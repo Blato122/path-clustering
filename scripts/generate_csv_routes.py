@@ -13,10 +13,10 @@ Assumptions:
 - Results are written to ../results relative to this script by default.
 """
 
-NUM_SAMPLES = 100       # Number of samples to generate per OD
+NUM_SAMPLES = 5       # Number of samples to generate per OD
 NUMBER_OF_PATHS = 2     # Number of paths to find for each origin-destination pair
 BETA = -3.0             # Beta parameter for the path generation
-MAX_ITERATIONS = 200    # Sampler safeguard
+MAX_ITERATIONS = 5    # Sampler safeguard
 SEED = 42               # For reproducibility
 
 RESULTS_DIR = Path("/results")  # Output folder
@@ -65,7 +65,7 @@ def main():
         "num_samples": NUM_SAMPLES,
         "number_of_paths": NUMBER_OF_PATHS,
         "beta": BETA,
-        "verbose": True, # Print the progress of the path generation
+        "verbose": False, # Print the progress of the path generation
     }
 
     for name, dir in network_dict.items():
@@ -83,15 +83,20 @@ def main():
         # Generate network
         network = jx.build_digraph(connection_file_path, edge_file_path, route_file_path)
         # Generate routes
-        routes = jx.basic_generator(
-            network, 
-            origins, 
-            destinations,
-            max_iterations=MAX_ITERATIONS,
-            as_df=True,
-            calc_free_flow=True,
-            **path_gen_kwargs
-        )
+        try:
+            routes = jx.basic_generator(
+                network, 
+                origins, 
+                destinations,
+                max_iterations=MAX_ITERATIONS,
+                as_df=True,
+                calc_free_flow=True,
+                **path_gen_kwargs
+            )
+        except AssertionError as e:
+            print(f"Skipping network {name}: {e}")
+            continue
+
         print(f"Time taken: {time.time() - start_time:.2f} seconds")
         
         # Save the routes to a CSV file    
