@@ -13,10 +13,10 @@ Assumptions:
 - Results are written to ../results relative to this script by default.
 """
 
-NUM_SAMPLES = 5       # Number of samples to generate per OD
-NUMBER_OF_PATHS = 2     # Number of paths to find for each origin-destination pair
+NUM_SAMPLES = 50       # Number of samples to generate per OD
+NUMBER_OF_PATHS = 3     # Number of paths to find for each origin-destination pair
 BETA = -3.0             # Beta parameter for the path generation
-MAX_ITERATIONS = 5    # Sampler safeguard
+MAX_ITERATIONS = 50    # Sampler safeguard
 SEED = 42               # For reproducibility
 
 RESULTS_DIR = Path("/results")  # Output folder
@@ -65,11 +65,15 @@ def main():
         "num_samples": NUM_SAMPLES,
         "number_of_paths": NUMBER_OF_PATHS,
         "beta": BETA,
-        "verbose": False, # Print the progress of the path generation
+        "verbose": True, # Print the progress of the path generation
     }
 
     for name, dir in network_dict.items():
         print(f"\nProcessing network: {name}")
+
+        # TEST
+        if name != "andorra":
+            continue
 
         connection_file_path = f"{dir}/{name}.con.xml"
         edge_file_path = f"{dir}/{name}.edg.xml"
@@ -80,9 +84,7 @@ def main():
         destinations = ods["destinations"]
         
         start_time = time.time()
-        # Generate network
         network = jx.build_digraph(connection_file_path, edge_file_path, route_file_path)
-        # Generate routes
         try:
             routes = jx.basic_generator(
                 network, 
