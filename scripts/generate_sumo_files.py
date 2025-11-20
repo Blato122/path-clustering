@@ -1,8 +1,8 @@
 from idf_utils import *
 
-OSM_FILE = "andorra.osm"
-NET_FILE = "andorra.net.xml"
-ROU_FILE = "andorra.rou.xml"
+OSM_FILE = "../data/andorra/andorra.osm"
+NET_FILE = "../data/andorra/andorra.net.xml"
+ROU_FILE = "../data/andorra/andorra.rou.xml"
 NET_NAME = "andorra"
 
 if not os.path.exists(OSM_FILE):

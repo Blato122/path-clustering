@@ -7,8 +7,8 @@ import math
 # SETUP
 ############################################
 
-OSM_FILE = "andorra.osm"
-NET_FILE = "andorra.net.xml"
+OSM_FILE = "../data/andorra/andorra.osm"
+NET_FILE = "../data/andorra/andorra.net.xml"
 
 ############################################
 # UTILS
@@ -91,6 +91,16 @@ def compute_length_from_shape(coords):
         total += math.hypot(x1 - x0, y1 - y0)
     return total
 
+def get_traffic_light_nodes(net_file):
+    tree = etree.parse(net_file)
+    root = tree.getroot()
+    tls_nodes = set() # junction ids
+
+    for junc in root.xpath("//junction[@type='traffic_light']"):
+        tls_nodes.add(junc.get("id"))
+
+    return tls_nodes
+
 ############################################
 # PART 1 — EXTRACT SUMO EDGES (.edg.xml)
 ############################################
@@ -129,20 +139,41 @@ edges_osm = edges_osm.set_index("osmid_clean") # replace default row index (0,1,
 
 merged_rows = []
 
-for _, row in df_sumo.iterrows():
+traffic_light_nodes = get_traffic_light_nodes(NET_FILE)
+df_sumo["has_traffic_light"] = df_sumo["to"].isin(traffic_light_nodes).astype(int)
+
+for idx, row in df_sumo.iterrows():
     osm_id = row["osm_id"]
 
+    # OSM features
     if osm_id in edges_osm.index:
-        rec = edges_osm.loc[osm_id]
-        if isinstance(rec, pd.DataFrame): # multiple matches case
-            rec = rec.iloc[0]
-        osm_feat = rec.to_dict()
+        osm_row = edges_osm.loc[osm_id]
+        if isinstance(osm_row, pd.DataFrame):
+            osm_row = osm_row.iloc[0]
+        highway = osm_row.get("highway")
+        maxspeed = osm_row.get("maxspeed")
+        lanes = osm_row.get("lanes")
     else:
-        osm_feat = {}
+        highway = None
+        maxspeed = None
+        lanes = None
 
+    merged_rows.append({
+        "sumo_id": row["sumo_id"],
+        "from": row["from"],
+        "to": row["to"],
+        "shape": row["shape"],
+        "priority": row["priority"],
+        "speed": row["speed"],
+        "num_lanes": row["lanes"],
 
-    merged = {**row.to_dict(), **osm_feat} # If keys overlap OSM features overwrite SUMO features
-    merged_rows.append(merged)
+        "has_traffic_light": int(row["has_traffic_light"]),
+
+        "osm_id": osm_id,
+        "highway": highway,
+        "maxspeed": maxspeed,
+        "lanes": lanes,
+    })
 
 df_merged = pd.DataFrame(merged_rows)
 df_merged["length"] = [
@@ -150,7 +181,6 @@ df_merged["length"] = [
     else compute_length_from_shape(r["shape"])
     for _, r in df_merged.iterrows()
 ]
-
 
 df_merged.to_csv("sumo_osm_merged.csv", index=False)
 
