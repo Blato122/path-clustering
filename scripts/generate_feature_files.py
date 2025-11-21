@@ -7,8 +7,10 @@ import math
 # SETUP
 ############################################
 
+# dehardcodify!
 OSM_FILE = "../data/andorra/andorra.osm"
 NET_FILE = "../data/andorra/andorra.net.xml"
+EDG_FILE = "../data/andorra/andorra.edg.xml"
 
 ############################################
 # UTILS
@@ -107,10 +109,12 @@ def get_traffic_light_nodes(net_file):
 
 print("\n=== Extracting SUMO edges ===")
 
-df_sumo = load_sumo_edges_from_edg("../data/andorra/andorra.edg.xml")
-df_sumo["osm_id"] = df_sumo["sumo_id"].apply(get_osm_id_from_sumo) # move
-df_sumo.to_csv("sumo_edges.csv", index=False)
-print("SUMO edges extracted to sumo_edges.csv")
+df_sumo = load_sumo_edges_from_edg(EDG_FILE)
+df_sumo["osmid"] = df_sumo["sumo_id"].apply(get_osm_id_from_sumo) # osmid also appears in the osm df
+traffic_light_nodes = get_traffic_light_nodes(NET_FILE)
+df_sumo["has_traffic_light"] = df_sumo["to"].isin(traffic_light_nodes).astype(int)
+# df_sumo.to_csv("sumo_edges.csv", index=False)
+# print("SUMO edges extracted to sumo_edges.csv")
 print(df_sumo.head())
 
 ############################################
@@ -120,14 +124,20 @@ print(df_sumo.head())
 print("\n=== Loading OSM with OSMnx ===")
 
 G = ox.graph_from_xml(OSM_FILE)
-nodes_osm, edges_osm = ox.graph_to_gdfs(G)
-# Some osmid values can be lists - convert to first element
-edges_osm["osmid_clean"] = edges_osm["osmid"].apply(
-    lambda x: x[0] if isinstance(x, list) else x
-) #?
-edges_osm.to_csv("osm_edges.csv", index=False)
-print("OSM edges extracted to osm_edges.csv")
-print(edges_osm[["osmid_clean", "highway", "lanes", "maxspeed"]].head())
+_ , edges_osm = ox.graph_to_gdfs(G)
+# some osmid values can be lists - explode so as not to lose any edges
+# reset_index() because after exploding, new rows share the same index
+edges_osm_exploded = edges_osm.explode("osmid").reset_index(drop=True)
+
+# ? flatten list attributes if they appear
+osm_cols_to_keep = ["highway", "maxspeed", "lanes"] # add more?
+for col in osm_cols_to_keep:
+    if col in edges_osm_exploded.columns:
+        edges_osm_exploded[col] = edges_osm_exploded[col].apply(lambda x: x[0] if isinstance(x, list) else x)
+
+# edges_osm.to_csv("osm_edges.csv", index=False)
+# print("OSM edges extracted to osm_edges.csv")
+print(edges_osm_exploded[["osmid", *osm_cols_to_keep]].head())
 
 ############################################
 # PART 3 — MERGE SUMO EDGES WITH OSM FEATURES
@@ -135,57 +145,23 @@ print(edges_osm[["osmid_clean", "highway", "lanes", "maxspeed"]].head())
 
 print("\n=== Merging SUMO edges with OSM features ===")
 
-edges_osm = edges_osm.set_index("osmid_clean") # replace default row index (0,1,2,...) with osmid
+# if multiple edges have the same id, take the 1st one
+edges_osm_unique = edges_osm_exploded.groupby("osmid")[osm_cols_to_keep].first().reset_index()
 
-merged_rows = []
+# Left join: keep all SUMO edges, attach OSM info where matches exist
+# the merge matches: df_sumo.osm_id == edges_osm_unique.index
+df_merged = pd.merge(
+    df_sumo,
+    edges_osm_unique,
+    on="osmid",
+    how="left"
+)
 
-traffic_light_nodes = get_traffic_light_nodes(NET_FILE)
-df_sumo["has_traffic_light"] = df_sumo["to"].isin(traffic_light_nodes).astype(int)
-
-for idx, row in df_sumo.iterrows():
-    osm_id = row["osm_id"]
-
-    # OSM features
-    if osm_id in edges_osm.index:
-        osm_row = edges_osm.loc[osm_id]
-        if isinstance(osm_row, pd.DataFrame):
-            osm_row = osm_row.iloc[0]
-        highway = osm_row.get("highway")
-        maxspeed = osm_row.get("maxspeed")
-        lanes = osm_row.get("lanes")
-    else:
-        highway = None
-        maxspeed = None
-        lanes = None
-
-    merged_rows.append({
-        "sumo_id": row["sumo_id"],
-        "from": row["from"],
-        "to": row["to"],
-        "shape": row["shape"],
-        "priority": row["priority"],
-        "speed": row["speed"],
-        "num_lanes": row["lanes"],
-
-        "has_traffic_light": int(row["has_traffic_light"]),
-
-        "osm_id": osm_id,
-        "highway": highway,
-        "maxspeed": maxspeed,
-        "lanes": lanes,
-    })
-
-df_merged = pd.DataFrame(merged_rows)
-df_merged["length"] = [
-    r["length"] if ("length" in df_merged.columns and pd.notna(r["length"]))
-    else compute_length_from_shape(r["shape"])
-    for _, r in df_merged.iterrows()
-]
-
-df_merged.to_csv("sumo_osm_merged.csv", index=False)
+df_merged["length"] = df_merged["shape"].apply(compute_length_from_shape)
+df_merged.to_csv("../results/merged_edges/sumo_osm_merged.csv", index=False)
 
 print("Merged SUMO + OSM features to sumo_osm_merged.csv")
-print(df_merged[["sumo_id", "osm_id", "highway", "lanes", "maxspeed"]].head())
+print(df_merged.head())
 
 ############################################
 # DONE
@@ -194,6 +170,6 @@ print(df_merged[["sumo_id", "osm_id", "highway", "lanes", "maxspeed"]].head())
 print("\n=== SUCCESS ===")
 print("All steps completed.")
 print("Check these files:")
-print("  - sumo_edges.csv")
-print("  - osm_edges.csv")
+# print("  - sumo_edges.csv")
+# print("  - osm_edges.csv")
 print("  - sumo_osm_merged.csv")

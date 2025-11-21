@@ -1,6 +1,7 @@
 from pathlib import Path
 import janux as jx
 import time
+import pandas as pd
 
 """
 Generate routes CSV for all networks found in a given directory.
@@ -10,7 +11,7 @@ The target use case is generating csv (origin,destination,path,other-features,..
 
 Assumptions:
 - Networks can be found under ../data relative to this script by default.
-- Results are written to ../results relative to this script by default.
+- Results are written to ../results/routes relative to this script by default.
 """
 
 NUM_SAMPLES = 50       # Number of samples to generate per OD
@@ -19,7 +20,7 @@ BETA = -3.0             # Beta parameter for the path generation
 MAX_ITERATIONS = 50    # Sampler safeguard
 SEED = 42               # For reproducibility
 
-RESULTS_DIR = Path("/results")  # Output folder
+RESULTS_DIR = Path("/results/routes")  # Output folder
 
 def find_networks(base_dir: Path) -> dict[str, Path]:
     """
@@ -30,6 +31,7 @@ def find_networks(base_dir: Path) -> dict[str, Path]:
     - <name>.edg.xml
     - <name>.rou.xml
     - od_<name>.json
+    - agents.csv
     """
     out = {}
     if not base_dir.exists():
@@ -38,11 +40,14 @@ def find_networks(base_dir: Path) -> dict[str, Path]:
         if not d.is_dir():
             continue
         name = d.name
-        con = d / f"{name}.con.xml"
-        edg = d / f"{name}.edg.xml"
-        rou = d / f"{name}.rou.xml"
-        od = d / f"od_{name}.json"
-        if con.exists() and edg.exists() and rou.exists() and od.exists():
+        files = [
+            d / f"{name}.con.xml",
+            d / f"{name}.edg.xml",
+            d / f"{name}.rou.xml",
+            d / f"od_{name}.json",
+            d / "agents.csv"
+        ]
+        if all(file.exists() for file in files):
             out[name] = d
     return out
 
@@ -71,10 +76,6 @@ def main():
     for name, dir in network_dict.items():
         print(f"\nProcessing network: {name}")
 
-        # TEST
-        if name != "andorra":
-            continue
-
         connection_file_path = f"{dir}/{name}.con.xml"
         edge_file_path = f"{dir}/{name}.edg.xml"
         route_file_path = f"{dir}/{name}.rou.xml"
@@ -82,29 +83,42 @@ def main():
         ods = jx.utils.read_json(f"{dir}/od_{name}.json")
         origins = ods["origins"]
         destinations = ods["destinations"]
+
+        # 300 origins and 300 destinations -> 90000 OD pairs -> too long to process!
+        # instead, take agents.csv (order of hundreds)
+        agents = pd.read_csv(f"{dir}/agents.csv")
         
+        all_routes = []
         start_time = time.time()
         network = jx.build_digraph(connection_file_path, edge_file_path, route_file_path)
-        try:
-            routes = jx.basic_generator(
-                network, 
-                origins, 
-                destinations,
-                max_iterations=MAX_ITERATIONS,
-                as_df=True,
-                calc_free_flow=True,
-                **path_gen_kwargs
-            )
-        except AssertionError as e:
-            print(f"Skipping network {name}: {e}")
-            continue
+
+        for o_id, d_id in zip(agents["origin"], agents["destination"]):
+            try:
+                # print(o_id, origins[o_id], d_id, destinations[d_id])
+                routes = jx.basic_generator(
+                    network, 
+                    [origins[o_id]], 
+                    [destinations[d_id]],
+                    max_iterations=MAX_ITERATIONS,
+                    as_df=True,
+                    calc_free_flow=True,
+                    **path_gen_kwargs
+                )
+                all_routes.append(routes)
+            except AssertionError as e:
+                print(f"Skipping network {name}: {e}")
+                continue
 
         print(f"Time taken: {time.time() - start_time:.2f} seconds")
-        
+
         # Save the routes to a CSV file    
-        csv_save_path = results_dir / f"{name}_routes.csv"
-        routes.to_csv(csv_save_path, index=False)
-        print(f"Saved routes to: {csv_save_path}")
+        if all_routes:
+            all_routes_merged = pd.concat(all_routes)
+            csv_save_path = results_dir / f"{name}_routes.csv"
+            all_routes_merged.to_csv(csv_save_path, index=False)
+            print(f"Saved routes to: {csv_save_path}")
+        else:
+            print(f"No routes generated for {name}")
 
 if __name__ == "__main__":
     main()
