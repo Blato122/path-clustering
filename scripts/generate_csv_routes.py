@@ -57,7 +57,6 @@ def main():
     repo_root = this_file.parents[1]
     data_dir = repo_root / "data"
     results_dir = repo_root / "results"
-
     results_dir.mkdir(parents=True, exist_ok=True)
 
     network_dict: dict[str, Path] = find_networks(data_dir)

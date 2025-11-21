@@ -149,7 +149,6 @@ print("\n=== Merging SUMO edges with OSM features ===")
 edges_osm_unique = edges_osm_exploded.groupby("osmid")[osm_cols_to_keep].first().reset_index()
 
 # Left join: keep all SUMO edges, attach OSM info where matches exist
-# the merge matches: df_sumo.osm_id == edges_osm_unique.index
 df_merged = pd.merge(
     df_sumo,
     edges_osm_unique,
