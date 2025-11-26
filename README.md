@@ -4,12 +4,13 @@
 ### * 20.11.2025:
 - enriched feature generation
 ### * 27.11.2025:
-- downloaded the osm files for Ile-de-France cities (instead of using Andorra for testing).
+- downloaded osm files for Ile-de-France cities (instead of using Andorra for testing).
 - changed path generation approach with Janux - instead of calculating a path for each OD
         pair, we now only do it for the OD pairs specified in agents.csv files. This allows for
         a massive speed up, reducing the number of generated paths per city from tens of thousands
         to the order of hundreds.
 - generated routes and enriched feature routes for all Ile-de-France cities using JanuX.
+- added many new features (bearing_std, pct_paved, num_turns, ...)
 - refactoring
 - fixed some bugs
 

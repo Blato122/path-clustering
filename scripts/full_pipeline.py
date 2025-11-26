@@ -232,8 +232,8 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
     df_sumo["osmid"] = df_sumo["sumo_id"].apply(get_osm_id_from_sumo) # osmid also appears in the osm df
     df_sumo["has_traffic_light"] = df_sumo["to"].isin(get_traffic_light_nodes(net_file)).astype(int)
     df_sumo["speed"] *= 3.6 # maxspeed, originally in m/s
-    print(df_sumo.head())
-    print(df_sumo.columns)
+    # print(df_sumo.head())
+    # print(df_sumo.columns)
 
     print("\n=== Loading OSM with OSMnx ===")
 
@@ -256,13 +256,12 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
         if col in edges_osm_exploded.columns:
             edges_osm_exploded[col] = edges_osm_exploded[col].apply(lambda x: x[0] if isinstance(x, list) else x)
 
-    print(edges_osm_exploded[["osmid", *osm_cols_to_keep]].head())
-
     print("\n=== Merging SUMO edges with OSM features ===")
 
     # if multiple edges have the same id, take the 1st one
     edges_osm_unique = edges_osm_exploded.groupby("osmid")[osm_cols_to_keep].first().reset_index()
-    print(edges_osm_unique.columns)
+    # print(edges_osm_unique[["osmid", *osm_cols_to_keep]].head())
+    # print(edges_osm_unique.columns)
 
     # Left join: keep all SUMO edges, attach OSM info where matches exist
     df_merged = pd.merge(
@@ -277,11 +276,11 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
     out_path = results_dir / f"{name}_merged_edges.csv"
     df_merged.to_csv(out_path, index=False)
 
-    print(f"Merged SUMO + OSM features to {out_path}")
-    print(df_merged.head())
+    # print(f"Merged SUMO + OSM features to {out_path}")
+    # print(df_merged.head())
 
 def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_dir: Path) -> None:
-    """Compute route features from edge data."""
+    """Compute route features from edge data"""
     print(f"\n=== Enriching routes for {name} ===")
     
     routes_file = routes_dir / f"{name}_routes.csv"
@@ -369,8 +368,7 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_di
         )
 
         # Bearing variance (high = winding route, low = straight) ~ sinuosity?
-        feature_dict["bearing_variance"] = df["bearing"].var(skipna=True)
-        feature_dict["mean_bearing"] = df["bearing"].mean(skipna=True)  
+        feature_dict["bearing_std"] = df["bearing"].std(skipna=True)
         feature_dict["num_turns"] = count_turns(df) # copy not needed, df isn't modified      
         feature_dict["num_bridges"] = df["bridge"].notna().sum(skipna=True)
         feature_dict["num_tunnels"] = df["tunnel"].notna().sum(skipna=True)

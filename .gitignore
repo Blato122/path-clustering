@@ -3,4 +3,5 @@ scripts/__pycache__
 # .venv
 # .vscode
 osm
-scripts/other
+scripts/other.py
+scripts/check_coverage.py

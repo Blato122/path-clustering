@@ -696,7 +696,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -30766788#0,965971290,1607941368,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship,30766788.0,0,,,,,265.83498802628714,494.57541280041335
 -30769857#0,1607941368,316420443,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship,30769857.0,0,,,,,67.21730361862784,
 -30845895,326095191,343120104,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship,30845895.0,0,asphalt,,,,35.64275598459423,238.41781221741314
--316187829,454636311,454636309,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,316187829.0,0,asphalt,yes,,,310.31688781809476,56.22963535388407
+-316187829,454636311,454636309,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,316187829.0,0,paved,yes,,,310.31688781809476,56.22963535388407
 -316189034#0,355003450,3223016454,11,highway.secondary,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,316189034.0,0,asphalt,yes,,,329.3004773446833,22.89400691448386
 -316189034#1,534955731,355003450,11,highway.secondary,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,316189034.0,0,asphalt,yes,,,329.3004773446833,63.93991502579405
 -316189034#2,534955538,534955731,11,highway.secondary,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,316189034.0,0,asphalt,yes,,,329.3004773446833,40.791358154354484
@@ -1304,7 +1304,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -759344334#0,7092862700,454837501,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,759344334.0,0,,,,,335.7488509311873,
 -759344334#1,7092862703,7092862700,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,759344334.0,0,,,,,335.7488509311873,121.77858926761434
 -766016161,7154263479,7154263475,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,766016161.0,0,,,,,256.27410345733404,85.03301802361875
--820861477,2966140090,7663153562,3,highway.residential,29.988,1,,tram rail_urban rail rail_electric rail_fast ship,820861477.0,0,asphalt,,,yes,90.03632210033582,
+-820861477,2966140090,7663153562,3,highway.residential,29.988,1,,tram rail_urban rail rail_electric rail_fast ship,820861477.0,0,asphalt,,,no,90.03632210033582,
 -83021691,965970104,965971222,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,83021691.0,0,,,,,67.9742097742977,76.72362175260363
 -83021694#0,1607941212,965971448,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,83021694.0,0,,,,,47.0539938088927,
 -83021694#1,965970614,1607941212,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,83021694.0,0,,,,,47.0539938088927,87.12198195195971
@@ -3763,7 +3763,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 761975309#1,7119271102,7119271089,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship,761975309.0,0,asphalt,,,,118.53620037144542,16.083314765893764
 761975309#2,7119271089,2533625239,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship,761975309.0,0,asphalt,,,,118.53620037144542,15.983497342041641
 766016161,7154263475,7154263479,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,766016161.0,0,,,,,256.27410345733404,85.03301802361875
-820861477,7663153562,2966140090,3,highway.residential,29.988,1,,tram rail_urban rail rail_electric rail_fast ship,820861477.0,0,asphalt,,,yes,90.03632210033582,
+820861477,7663153562,2966140090,3,highway.residential,29.988,1,,tram rail_urban rail rail_electric rail_fast ship,820861477.0,0,asphalt,,,no,90.03632210033582,
 822488258,1588643974,1588661969,12,highway.primary,90.0,2,,tram rail_urban rail rail_electric rail_fast ship,822488258.0,0,asphalt,,,,30.745089800008238,1449.3352426301697
 823241408#0,319601077,977276916,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,823241408.0,0,,,,,230.75372203489823,
 823241408#1,977276916,319600887,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship,823241408.0,0,,,,,230.75372203489823,33.86819947869471

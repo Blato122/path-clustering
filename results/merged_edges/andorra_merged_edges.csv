@@ -979,7 +979,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -1101645438,10081303837,10081303838,1,highway.path,20.016,1,pedestrian bicycle,,1101645438.0,0,,,,,218.059647435141,70.08063303774716
 -1101645439,10081303838,2565304620,1,highway.path,20.016,1,pedestrian bicycle,,1101645439.0,0,,,,,302.2850553775212,35.41128223173541
 -1101645440,10081303838,4312460433,1,highway.path,20.016,1,pedestrian bicycle,,1101645440.0,0,,,,,104.9132578225211,6.505848358607986
--1102344827,2204962477,10087012515,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344827.0,0,asphalt,,,,322.38893748480484,
+-1102344827,2204962477,10087012515,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344827.0,0,ground,,,,322.38893748480484,
 -1102344829,5434980949,2832696787,1,highway.path,20.016,1,pedestrian bicycle,,1102344829.0,0,asphalt,,,,208.97178759200207,32.45343842721887
 -1102344832#0,292503720,51390143,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1102344832.0,0,asphalt,,,,270.5799764385308,45.16441582293876
 -1102344832#1,292503721,292503720,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1102344832.0,0,asphalt,,,,270.5799764385308,
@@ -1812,7 +1812,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -1357528245,3956235436,3956235439,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528245.0,0,,,,,160.11028408713918,
 -1357528251#0,5387466953,8686483307,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528251.0,0,asphalt,,,yes,152.85533252748027,23.094173979757635
 -1357528251#1,264278124,5387466953,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528251.0,0,asphalt,,,yes,152.85533252748027,78.27554117052968
--1357528252,51444358,264278124,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528252.0,0,asphalt,,,yes,341.86312542228694,120.70699441331618
+-1357528252,51444358,264278124,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528252.0,0,paving_stones,,,yes,341.86312542228694,120.70699441331618
 -1357528253#0,3673199849,51973033,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528253.0,0,asphalt,,,,132.95345355543412,41.16884309165653
 -1357528253#1,51973021,3673199849,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528253.0,0,asphalt,,,,132.95345355543412,36.2290415128378
 -1357528254,2090937789,3743097668,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528254.0,0,asphalt,,,,270.58546559035216,
@@ -1851,7 +1851,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -1357544257#4,52297301,52288377,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357544257.0,0,asphalt,,,,270.72192246381263,59.547055475887184
 -1357544257#5,52288390,52297301,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357544257.0,0,asphalt,,,,270.72192246381263,30.45558797310533
 -1357544257#6,10916271980,52288390,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357544257.0,0,asphalt,,,,270.72192246381263,200.68469800183544
--1357544258,3761938614,3761938604,1,highway.path,20.016,1,pedestrian bicycle,,1357544258.0,0,compacted,yes,,,128.35699935480983,278.8301472364462
+-1357544258,3761938614,3761938604,1,highway.path,20.016,1,pedestrian bicycle,,1357544258.0,0,ground,yes,,,128.35699935480983,278.8301472364462
 -1357544259,4235379114,4235379112,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,1357544259.0,0,asphalt,,,,297.80240225593076,50.24263324315837
 -1357544261,10916227772,4235379152,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357544261.0,0,asphalt,yes,,,242.31643625830603,22.192990592044524
 -1357544262#0,52261924,52261926,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357544262.0,0,asphalt,,,,136.68790509858647,16.60333952652298
@@ -2031,7 +2031,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -1422867161,13076216333,13076216346,1,highway.path,20.016,1,pedestrian bicycle,,1422867161.0,0,,,,,297.16094838373107,56.198500296822324
 -1422868328#0,3406258897,1894342408,1,highway.path,20.016,1,pedestrian bicycle,,1422868328.0,0,,,,,80.75762970846765,733.8708662782701
 -1422868328#1,1894471931,3406258897,1,highway.path,20.016,1,pedestrian bicycle,,1422868328.0,0,,,,,80.75762970846765,30.043313320351306
--1426055502,9736186140,9736186138,1,highway.service,20.016,1,pedestrian delivery bicycle,,1426055502.0,0,paved,,,,297.7797341643639,35.291901915278586
+-1426055502,9736186140,9736186138,1,highway.service,20.016,1,pedestrian delivery bicycle,,1426055502.0,0,paving_stones,,,,297.7797341643639,35.291901915278586
 -1426056849,9736186140,6733504658,1,highway.pedestrian,10.008,1,pedestrian,,1426056849.0,0,paving_stones,,,yes,181.0608522701737,28.235495699699964
 -1426056850#0,12204789131,9736260756,1,highway.path,20.016,1,pedestrian bicycle,,1426056850.0,0,asphalt,,,,145.88944908303327,
 -1426056850#1,9736260763,12204789131,1,highway.path,20.016,1,pedestrian bicycle,,1426056850.0,0,asphalt,,,,145.88944908303327,23.832526536053127
@@ -2071,7 +2071,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -1449432385#1,2878941236,9699458379,10,highway.tertiary,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1449432385.0,0,asphalt,,,yes,57.24527621759149,3.5351979797018855
 -153793578#0,796040771,51385976,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,153793578.0,0,asphalt,,,yes,0.9055267434341719,
 -153793578#1,52009129,796040771,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,153793578.0,0,asphalt,,,yes,0.9055267434341719,176.0128487760162
--169778334,51957018,51957020,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,169778334.0,0,asphalt,,,,229.77007939923118,49.30937329755415
+-169778334,51957018,51957020,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,169778334.0,0,gravel,,,,229.77007939923118,49.30937329755415
 -172305371#0,1832213735,206330773,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,172305371.0,0,,,,,27.087355290517202,128.50487101685587
 -172305371#1,1832213750,1832213735,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,172305371.0,0,,,,,27.087355290517202,50.312044449133985
 -172305412#0,1832213785,2565304751,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,172305412.0,0,gravel,,,,43.59244943299856,650.5177176090839
@@ -2496,7 +2496,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -206366323#1,2132355704,2132354703,1,highway.path,20.016,1,pedestrian bicycle,,206366323.0,0,,,,,285.1257499426005,988.1260704003281
 -206366323#2,2132356440,2132355704,1,highway.path,20.016,1,pedestrian bicycle,,206366323.0,0,,,,,285.1257499426005,448.23577560183185
 -206366323#3,1809370473,2132356440,1,highway.path,20.016,1,pedestrian bicycle,,206366323.0,0,,,,,285.1257499426005,227.1687035069689
--206377993,51957020,2163846769,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,206377993.0,0,asphalt,,,,229.77007939923118,484.440620474657
+-206377993,51957020,2163846769,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,206377993.0,0,gravel,,,,229.77007939923118,484.440620474657
 -206377994#0,9714514025,51957009,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,206377994.0,0,asphalt,,,,290.6104530347782,18.304086364961712
 -206377994#1,2189432000,9714514025,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,206377994.0,0,asphalt,,,,290.6104530347782,668.9936820822063
 -206377994#10,51951985,3650962510,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,206377994.0,0,asphalt,,,,290.6104530347782,274.2062573297218
@@ -3916,7 +3916,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -28828789#2,2966871094,316947017,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28828789.0,0,,,,,332.2272381210774,48.55136761418533
 -28828789#3,2966872587,2966871094,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28828789.0,0,,,,,332.2272381210774,
 -28828789#4,316951001,2966872587,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28828789.0,0,,,,,332.2272381210774,72.5490793969287
--28829736,316961225,316961219,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829736.0,0,asphalt,,,,208.48921346769822,32.281774927467616
+-28829736,316961225,316961219,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829736.0,0,ground,,,,208.48921346769822,32.281774927467616
 -28829748,3874336240,316961289,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829748.0,0,,,,,56.69374345809531,163.23372181828424
 -28829753#0,316961343,3874336239,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829753.0,0,asphalt,,,,36.37243387316278,391.5264587595326
 -28829753#1,316961219,316961343,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829753.0,0,asphalt,,,,36.37243387316278,
@@ -4183,8 +4183,8 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -319265256,3256762930,3256762952,1,highway.service,20.016,1,pedestrian delivery bicycle,,319265256.0,0,,,,,181.1199920860389,
 -319998086#0,3265024061,52688680,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319998086.0,0,asphalt,,,,191.09592662454077,
 -319998086#1,3265024063,3265024061,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319998086.0,0,asphalt,,,,191.09592662454077,
--319999056#0,3265028492,3265024063,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,asphalt,,,,155.25804834129463,15.080880446501506
--319999056#1,5929279922,3265028492,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,asphalt,,,,155.25804834129463,117.70059357277262
+-319999056#0,3265028492,3265024063,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,paving_stones,,,,155.25804834129463,15.080880446501506
+-319999056#1,5929279922,3265028492,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,paving_stones,,,,155.25804834129463,117.70059357277262
 -319999353,51119957,51119961,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319999353.0,0,asphalt,,,,185.3801751770284,122.98160034866865
 -319999355#0,9025875302,51119957,12,highway.primary,29.988,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319999355.0,0,asphalt,,,,152.5828660073439,25.696425912673774
 -319999355#1,51119951,9025875302,12,highway.primary,29.988,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319999355.0,0,asphalt,,,,152.5828660073439,49.85383899684768
@@ -4998,9 +4998,9 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -361403478#1,3658843188,3658843304,1,highway.path,20.016,1,pedestrian bicycle,,361403478.0,0,,,,,209.48885784468015,1761.036389432932
 -361405520#1,3658865171,3658864916,1,highway.path,20.016,1,pedestrian bicycle,,361405520.0,0,,,,,317.51991734793427,1117.30948506596
 -361405520#2,3658843188,3658865171,1,highway.path,20.016,1,pedestrian bicycle,,361405520.0,0,,,,,317.51991734793427,133.89182278541634
--361405521#0,10911917322,316961225,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,asphalt,,,,208.48921346769822,
--361405521#1,3658865188,10911917322,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,asphalt,,,,208.48921346769822,
--361405521#2,3658865199,3658865188,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,asphalt,,,,208.48921346769822,766.4257942602462
+-361405521#0,10911917322,316961225,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,ground,,,,208.48921346769822,
+-361405521#1,3658865188,10911917322,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,ground,,,,208.48921346769822,
+-361405521#2,3658865199,3658865188,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,ground,,,,208.48921346769822,766.4257942602462
 -361405522#0,4314185944,3658843056,1,highway.path,20.016,1,pedestrian bicycle,,361405522.0,0,,,,,254.3622289532102,272.8261696592531
 -361405522#1,3658865218,4314185944,1,highway.path,20.016,1,pedestrian bicycle,,361405522.0,0,,,,,254.3622289532102,231.28956441955478
 -361405522#2,3658842728,3658865218,1,highway.path,20.016,1,pedestrian bicycle,,361405522.0,0,,,,,254.3622289532102,142.24100351465177
@@ -5855,7 +5855,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -385383498#3,53275028,53275040,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,385383498.0,0,asphalt,,,,341.47715104280127,66.98210117775207
 -385383503#0,3887318593,3887318600,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383503.0,0,,,,,289.35720490229403,67.99104143435761
 -385383503#1,2060495151,3887318593,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383503.0,0,,,,,289.35720490229403,26.169680433565347
--385383504,2060495016,3378337635,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383504.0,0,asphalt,,,,140.39083827253506,237.81904211184434
+-385383504,2060495016,3378337635,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383504.0,0,sett,,,,140.39083827253506,237.81904211184434
 -385383505#0,53282943,53282932,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,385383505.0,0,,,,,168.24287298262257,85.10135652634749
 -385383505#1,53282950,53282943,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,385383505.0,0,,,,,168.24287298262257,92.50749981682205
 -385383506,3378337267,9192777488,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383506.0,0,ground,,,,252.26987795243224,320.5598433703148
@@ -6720,7 +6720,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -6177369#2,2287019214,12188412753,12,highway.primary,50.004000000000005,1,,pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,6177369.0,0,asphalt,,,,65.07161578394937,53.081238308362096
 -6177369#3,5043815480,2287019214,12,highway.primary,50.004000000000005,1,,pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,6177369.0,0,asphalt,,,,65.07161578394937,
 -617752886#0,5839414327,332119070,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,617752886.0,0,gravel,yes,,,44.20058373179526,239.81073448327928
--617752887,5839414329,5839414327,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,617752887.0,0,concrete,yes,,,353.70163862677435,18.415869169457658
+-617752887,5839414329,5839414327,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,617752887.0,0,gravel,yes,,,353.70163862677435,18.415869169457658
 -617752888#0,6578420536,5839414329,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,617752888.0,0,gravel,yes,,,141.89806572963948,84.10281867316367
 -617752888#1,4098969368,6578420536,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,617752888.0,0,gravel,yes,,,141.89806572963948,361.1205883774377
 -617823684,5839921583,3276744410,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,617823684.0,0,asphalt,,,,199.96461985654093,193.3089221623946
@@ -7328,7 +7328,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -697859714#0,6553855880,6553855878,1,highway.path,20.016,1,pedestrian bicycle,,697859714.0,0,dirt,,,,86.21749863560618,
 -697859714#1,6553855879,6553855880,1,highway.path,20.016,1,pedestrian bicycle,,697859714.0,0,dirt,,,,86.21749863560618,
 -697859715,6553893694,3405907649,1,highway.path,20.016,1,pedestrian bicycle,,697859715.0,0,dirt,,,,243.4941284286817,94.3730744789413
--697859716#1,52831541,6553893715,1,highway.path,20.016,1,pedestrian bicycle,,697859716.0,0,asphalt,,,,314.0271949394431,724.8104398694641
+-697859716#1,52831541,6553893715,1,highway.path,20.016,1,pedestrian bicycle,,697859716.0,0,dirt,,,,314.0271949394431,724.8104398694641
 -697859717#0,6553893715,6553893728,1,highway.path,20.016,1,pedestrian bicycle,,697859717.0,0,dirt,,,,243.69605430383052,463.2184321280421
 -697859717#1,2189430470,6553893715,1,highway.path,20.016,1,pedestrian bicycle,,697859717.0,0,dirt,,,,243.69605430383052,205.8297685237772
 -697859718#0,6553893728,12201230780,1,highway.path,20.016,1,pedestrian bicycle,,697859718.0,0,,,,,127.64161143513147,148.22296137571303
@@ -7374,7 +7374,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 -700510995,5839414327,51581823,1,highway.service,20.016,1,pedestrian delivery bicycle,,700510995.0,0,compacted,,,,193.72441633376846,127.88101794479999
 -700510996,6578420533,6578420535,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700510996.0,0,,yes,,,210.76029442585744,60.05026013856841
 -700519371,6578497255,3417103732,1,highway.path,20.016,1,pedestrian bicycle,,700519371.0,0,ground,,,,251.91619609782322,1006.7022277963267
--700519372,3268197225,6578497246,1,highway.path,20.016,1,pedestrian bicycle,,700519372.0,0,asphalt,,,yes,70.52205206151987,1936.4119895078861
+-700519372,3268197225,6578497246,1,highway.path,20.016,1,pedestrian bicycle,,700519372.0,0,unhewn_cobblestone,,,yes,70.52205206151987,1936.4119895078861
 -700519373,3417087313,6578497089,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700519373.0,0,,,,,156.26643077148427,
 -700519374#0,6578497085,6578497086,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700519374.0,0,,,,,225.37420046429085,182.70109160699144
 -700519374#1,6578468984,6578497085,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700519374.0,0,,,,,225.37420046429085,
@@ -8915,8 +8915,8 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1055617485,5845961517,9699884685,1,highway.path,20.016,1,pedestrian bicycle,,1055617485.0,0,unpaved,,,,182.78298931954427,
 1055617486,9699884688,9699884681,1,highway.steps,5.004,1,pedestrian,,1055617486.0,0,unpaved,,,,69.52154185300266,
 1055617487,9699884681,9699884687,1,highway.steps,5.004,1,pedestrian,,1055617487.0,0,concrete,,,,153.8255606572466,
-1055779809,9701153580,9701153576,1,highway.steps,5.004,1,pedestrian,,1055779809.0,0,asphalt,,,,346.17597622339343,9.60218477180964
-1055779810,9701153591,9701153580,1,highway.footway,10.008,1,pedestrian,,1055779810.0,0,asphalt,,,,346.17597622339343,
+1055779809,9701153580,9701153576,1,highway.steps,5.004,1,pedestrian,,1055779809.0,0,paved,,,,346.17597622339343,9.60218477180964
+1055779810,9701153591,9701153580,1,highway.footway,10.008,1,pedestrian,,1055779810.0,0,paved,,,,346.17597622339343,
 1055779811,9701153578,5845961501,1,highway.service,20.016,1,pedestrian delivery bicycle,,1055779811.0,0,asphalt,,,,77.53309254540245,26.906213376443617
 1055779812#0,5845961488,9701153591,1,highway.service,20.016,1,pedestrian delivery bicycle,,1055779812.0,0,asphalt,,,,111.75751603587344,
 1055779812#1,9701153591,9701153582,1,highway.service,20.016,1,pedestrian delivery bicycle,,1055779812.0,0,asphalt,,,,111.75751603587344,33.38616033893403
@@ -9309,8 +9309,8 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1056867535#0,9711090197,9711090173,12,highway.primary,60.01200000000001,2,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1056867535.0,0,asphalt,,,,14.4201740229828,
 1056867535#1,9711090173,9711090184,12,highway.primary,60.01200000000001,2,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1056867535.0,0,asphalt,,,,14.4201740229828,
 1056867535#2,9711090184,51581643,12,highway.primary,60.01200000000001,2,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1056867535.0,0,asphalt,,,,14.4201740229828,58.89093507503884
-1057068942#1,9042573415,2423142214,1,highway.footway,10.008,1,pedestrian,,1057068942.0,0,asphalt,,,yes,341.86312542228694,156.91968847118451
-1057068942#2,2423142214,51444358,1,highway.footway,10.008,1,pedestrian,,1057068942.0,0,asphalt,,,yes,341.86312542228694,101.49206397069842
+1057068942#1,9042573415,2423142214,1,highway.footway,10.008,1,pedestrian,,1057068942.0,0,paving_stones,,,yes,341.86312542228694,156.91968847118451
+1057068942#2,2423142214,51444358,1,highway.footway,10.008,1,pedestrian,,1057068942.0,0,paving_stones,,,yes,341.86312542228694,101.49206397069842
 1057068943#0,2423142290,10914336422,1,highway.footway,10.008,1,pedestrian,,1057068943.0,0,paving_stones,,,yes,310.9152002114542,33.32723698408018
 1057068943#1,10914336422,9042573415,1,highway.footway,10.008,1,pedestrian,,1057068943.0,0,paving_stones,,,yes,310.9152002114542,460.10601586108487
 1057068948,1860080828,1860080899,12,highway.primary,39.996,1,,pedestrian tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1057068948.0,0,asphalt,yes,,,320.13553011642887,623.7005701043786
@@ -11047,7 +11047,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1098524979#0,10058358200,10058358204,1,highway.path,20.016,1,pedestrian bicycle,,1098524979.0,0,unpaved,,,,256.78792639888906,56.9173722694203
 1098524979#1,10058358204,10058358198,1,highway.path,20.016,1,pedestrian bicycle,,1098524979.0,0,unpaved,,,,256.78792639888906,26.064504445593847
 1098524979#2,10058358198,10058358197,1,highway.path,20.016,1,pedestrian bicycle,,1098524979.0,0,unpaved,,,,256.78792639888906,
-1098524980,10058361220,10058358209,1,highway.cycleway,20.016,1,pedestrian bicycle,,1098524980.0,0,paved,,,,24.072283275707303,413.2314739582932
+1098524980,10058361220,10058358209,1,highway.cycleway,20.016,1,pedestrian bicycle,,1098524980.0,0,unpaved,,,,24.072283275707303,413.2314739582932
 1098524981#1,10058358209,5706448494,1,highway.path,20.016,1,pedestrian bicycle,,1098524981.0,0,unpaved,,,,61.722362803175045,133.2388911496173
 1099898497,10069089626,10069089625,1,highway.path,20.016,1,pedestrian bicycle,,1099898497.0,0,wood,yes,,no,48.374389276987024,
 1099898498,10069089625,3746931958,1,highway.path,20.016,1,pedestrian bicycle,,1099898498.0,0,wood,yes,,no,48.374389276987024,103.28083503058629
@@ -11066,7 +11066,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1101645439,2565304620,10081303838,1,highway.path,20.016,1,pedestrian bicycle,,1101645439.0,0,,,,,302.2850553775212,35.41128223173541
 1101645440,4312460433,10081303838,1,highway.path,20.016,1,pedestrian bicycle,,1101645440.0,0,,,,,104.9132578225211,6.505848358607986
 1102344826,10087012511,10087012507,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344826.0,0,asphalt,,,,354.3898540821593,38.42469718820847
-1102344827,10087012515,2204962477,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344827.0,0,asphalt,,,,322.38893748480484,
+1102344827,10087012515,2204962477,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344827.0,0,ground,,,,322.38893748480484,
 1102344828#0,51393769,10087089167,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344828.0,0,asphalt,,,,176.40923928715102,35.65648910802005
 1102344828#1,10087089167,10087020019,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344828.0,0,asphalt,,,,176.40923928715102,31.38196096642764
 1102344828#2,10087020019,10087012515,1,highway.service,20.016,1,pedestrian delivery bicycle,,1102344828.0,0,asphalt,,,,176.40923928715102,138.11977993539242
@@ -11398,7 +11398,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1174782558,6710984553,6710984555,1,highway.footway,10.008,1,pedestrian,,1174782558.0,0,unpaved,,,,49.60302468632681,38.51620823649025
 1174789807,3761938604,4235379114,1,highway.path,20.016,1,pedestrian bicycle,,1174789807.0,0,ground,,,,257.31175275106193,526.4828330452216
 1174789808,52261926,10916227772,1,highway.footway,10.008,1,pedestrian,,1174789808.0,0,,,,,165.94941348617922,98.03495572530234
-1174790378,3761938604,3761938614,1,highway.path,20.016,1,pedestrian bicycle,,1174790378.0,0,compacted,yes,,,128.35699935480983,278.83014723644624
+1174790378,3761938604,3761938614,1,highway.path,20.016,1,pedestrian bicycle,,1174790378.0,0,ground,yes,,,128.35699935480983,278.83014723644624
 1174790379#0,3761938568,3761938623,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1174790379.0,0,unhewn_cobblestone,,,yes,195.15222619998295,44.220154265116584
 1174790379#1,3761938623,10916281469,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1174790379.0,0,unhewn_cobblestone,,,yes,195.15222619998295,
 1174790379#2,10916281469,10916281465,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1174790379.0,0,unhewn_cobblestone,,,yes,195.15222619998295,112.5281417878962
@@ -11445,7 +11445,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1174822482#1,3746998333,52262325,1,highway.path,20.016,1,pedestrian bicycle,,1174822482.0,0,,,,,256.5241660808382,16.67470432109221
 1174822483,10916447555,3746998333,1,highway.path,20.016,1,pedestrian bicycle,,1174822483.0,0,,,,,13.478208522089862,38.82928484774976
 1174822893,10909398598,10916447518,1,highway.footway,10.008,1,pedestrian,,1174822893.0,0,,,,,26.626928441728467,
-1174822894,10909398594,5141025381,1,highway.footway,10.008,1,pedestrian,,1174822894.0,1,asphalt,,,,170.19814128641303,235.48959825324022
+1174822894,10909398594,5141025381,1,highway.footway,10.008,1,pedestrian,,1174822894.0,1,paving_stones,,,,170.19814128641303,235.48959825324022
 1174823217,5141025384,3746998711,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1174823217.0,0,,,,yes,107.09732932946152,
 1174823218,5141025384,3746998711,1,highway.footway,10.008,1,pedestrian,,1174823218.0,0,,,,,107.09732932946152,50.02101809792086
 1174969972#1,10917820867,10917820866,1,highway.footway,10.008,1,pedestrian,,1174969972.0,0,,,,,244.35552556911932,
@@ -13829,7 +13829,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1357528250,9740881173,8686483284,1,highway.service,20.016,1,pedestrian delivery bicycle,,1357528250.0,0,asphalt,,,,200.43041657314433,21.30074201579935
 1357528251#0,8686483307,5387466953,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528251.0,0,asphalt,,,yes,152.85533252748027,23.094173979757635
 1357528251#1,5387466953,264278124,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528251.0,0,asphalt,,,yes,152.85533252748027,78.27554117052968
-1357528252,264278124,51444358,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528252.0,0,asphalt,,,yes,341.86312542228694,120.70699441331617
+1357528252,264278124,51444358,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528252.0,0,paving_stones,,,yes,341.86312542228694,120.70699441331617
 1357528253#0,51973033,3673199849,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528253.0,0,asphalt,,,,132.95345355543412,41.16884309165653
 1357528253#1,3673199849,51973021,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528253.0,0,asphalt,,,,132.95345355543412,36.2290415128378
 1357528254,3743097668,2090937789,11,highway.secondary,100.00800000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,1357528254.0,0,asphalt,,,,270.58546559035216,
@@ -14292,7 +14292,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 1426053359,13108871222,13108871228,1,highway.footway,10.008,1,pedestrian,,1426053359.0,0,concrete,,,,337.1650300513422,
 1426053360#0,13108871229,13108871231,1,highway.steps,5.004,1,pedestrian,,1426053360.0,0,concrete,,,,337.1650300513422,5.682483755843508
 1426053360#1,13108871231,13108871228,1,highway.steps,5.004,1,pedestrian,,1426053360.0,0,concrete,,,,337.1650300513422,
-1426055502,9736186138,9736186140,1,highway.service,20.016,1,pedestrian delivery bicycle,,1426055502.0,0,paved,,,,297.7797341643639,35.291901915278586
+1426055502,9736186138,9736186140,1,highway.service,20.016,1,pedestrian delivery bicycle,,1426055502.0,0,paving_stones,,,,297.7797341643639,35.291901915278586
 1426056849,6733504658,9736186140,1,highway.pedestrian,10.008,1,pedestrian,,1426056849.0,0,paving_stones,,,yes,181.0608522701737,28.23549569969996
 1426056850#0,9736260756,12204789131,1,highway.path,20.016,1,pedestrian bicycle,,1426056850.0,0,asphalt,,,,145.88944908303327,
 1426056850#1,12204789131,9736260763,1,highway.path,20.016,1,pedestrian bicycle,,1426056850.0,0,asphalt,,,,145.88944908303327,23.832526536053123
@@ -14387,7 +14387,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 153793578#1,796040771,52009129,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,153793578.0,0,asphalt,,,yes,0.9055267434341719,176.01284877601617
 153793579#0,3459377514,12216097173,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,153793579.0,0,asphalt,,,yes,101.9870032043229,
 153793579#1,12216097173,52261853,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,153793579.0,0,asphalt,,,yes,101.9870032043229,54.88490596177638
-169778334,51957020,51957018,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,169778334.0,0,asphalt,,,,229.77007939923118,49.30937329755415
+169778334,51957020,51957018,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,169778334.0,0,gravel,,,,229.77007939923118,49.30937329755415
 172305371#0,206330773,1832213735,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,172305371.0,0,,,,,27.087355290517202,128.50487101685587
 172305371#1,1832213735,1832213750,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,172305371.0,0,,,,,27.087355290517202,50.312044449133985
 172305412#0,2565304751,1832213785,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,172305412.0,0,gravel,,,,43.59244943299856,650.5177176090838
@@ -15066,7 +15066,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 206366323#1,2132354703,2132355704,1,highway.path,20.016,1,pedestrian bicycle,,206366323.0,0,,,,,285.1257499426005,988.1260704003283
 206366323#2,2132355704,2132356440,1,highway.path,20.016,1,pedestrian bicycle,,206366323.0,0,,,,,285.1257499426005,448.235775601832
 206366323#3,2132356440,1809370473,1,highway.path,20.016,1,pedestrian bicycle,,206366323.0,0,,,,,285.1257499426005,227.16870350696882
-206377993,2163846769,51957020,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,206377993.0,0,asphalt,,,,229.77007939923118,484.440620474657
+206377993,2163846769,51957020,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,206377993.0,0,gravel,,,,229.77007939923118,484.440620474657
 206377994#0,51957009,9714514025,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,206377994.0,0,asphalt,,,,290.6104530347782,18.304086364961712
 206377994#1,9714514025,2189432000,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,206377994.0,0,asphalt,,,,290.6104530347782,668.9936820822064
 206377994#10,3650962510,51951985,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,206377994.0,0,asphalt,,,,290.6104530347782,274.20625732972167
@@ -16261,7 +16261,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 24713566#1,268617414,268617422,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713566.0,0,,,,,57.88748660759145,113.5260990276687
 24713578,268617414,268617493,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713578.0,0,,,,,46.104301183511055,148.02794173547647
 24713611,268617808,268617809,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713611.0,0,,,,,333.9114799367283,60.93742261071834
-24713692,3268197225,268618417,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713692.0,0,asphalt,,,yes,70.52205206151987,38.172430005130636
+24713692,3268197225,268618417,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713692.0,0,unhewn_cobblestone,,,yes,70.52205206151987,38.172430005130636
 24713704#0,6643023603,268124758,12,highway.primary,100.00800000000001,2,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713704.0,0,asphalt,,,,313.9777444496627,102.52977409362913
 24713704#1,268124758,3268197281,12,highway.primary,100.00800000000001,2,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713704.0,0,asphalt,,,,313.9777444496627,468.32165968327547
 24713704#2,3268197281,52202298,12,highway.primary,100.00800000000001,2,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,24713704.0,0,asphalt,,,,313.9777444496627,42.53809244418802
@@ -16958,7 +16958,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 28828789#2,316947017,2966871094,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28828789.0,0,,,,,332.2272381210774,48.55136761418533
 28828789#3,2966871094,2966872587,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28828789.0,0,,,,,332.2272381210774,
 28828789#4,2966872587,316951001,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28828789.0,0,,,,,332.2272381210774,72.5490793969287
-28829736,316961219,316961225,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829736.0,0,asphalt,,,,208.48921346769822,32.281774927467616
+28829736,316961219,316961225,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829736.0,0,ground,,,,208.48921346769822,32.281774927467616
 28829748,316961289,3874336240,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829748.0,0,,,,,56.69374345809531,163.2337218182842
 28829753#0,3874336239,316961343,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829753.0,0,asphalt,,,,36.37243387316278,391.5264587595327
 28829753#1,316961343,316961219,4,highway.unclassified,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,28829753.0,0,asphalt,,,,36.37243387316278,
@@ -17154,7 +17154,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 30605683#0,338425045,9020981696,1,highway.service,20.016,1,pedestrian delivery bicycle,,30605683.0,0,,,,,252.3633528218854,32.413382227126405
 30605683#1,9020981696,53327626,1,highway.service,20.016,1,pedestrian delivery bicycle,,30605683.0,0,,,,,252.3633528218854,13.846907838027857
 30605686,338425046,338425484,1,highway.footway,10.008,1,pedestrian,,30605686.0,0,unhewn_cobblestone,,,no,218.00363772657545,29.735208212663174
-30605697,338425636,338425648,1,highway.steps,5.004,1,pedestrian,,30605697.0,0,unhewn_cobblestone,,,yes,306.41208451104836,166.96328877213077
+30605697,338425636,338425648,1,highway.steps,5.004,1,pedestrian,,30605697.0,0,unhewn_cobblestone,,,no,306.41208451104836,166.96328877213077
 30605769#1,338426330,338425486,1,highway.footway,10.008,1,pedestrian,,30605769.0,0,dirt,,,,40.70843542068358,163.18626248706127
 306483451#0,2008332614,5344481892,1,highway.path,20.016,1,pedestrian bicycle,,306483451.0,0,,,,,353.4918368391438,1270.6190168818928
 306483451#1,5344481892,3114358957,1,highway.path,20.016,1,pedestrian bicycle,,306483451.0,0,,,,,353.4918368391438,475.15609672626806
@@ -17365,8 +17365,8 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 319265257#5,3256733454,3256762906,1,highway.service,20.016,1,pedestrian delivery bicycle,,319265257.0,0,,,,,269.18706524380195,113.27112035974011
 319998086#0,52688680,3265024061,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319998086.0,0,asphalt,,,,191.09592662454077,
 319998086#1,3265024061,3265024063,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319998086.0,0,asphalt,,,,191.09592662454077,
-319999056#0,3265024063,3265028492,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,asphalt,,,,155.25804834129463,15.080880446501506
-319999056#1,3265028492,5929279922,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,asphalt,,,,155.25804834129463,117.70059357277263
+319999056#0,3265024063,3265028492,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,paving_stones,,,,155.25804834129463,15.080880446501506
+319999056#1,3265028492,5929279922,1,highway.path,20.016,1,pedestrian bicycle,,319999056.0,0,paving_stones,,,,155.25804834129463,117.70059357277263
 319999353,51119961,51119957,12,highway.primary,60.01200000000001,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319999353.0,0,asphalt,,,,185.3801751770284,122.98160034866864
 319999355#0,51119957,9025875302,12,highway.primary,29.988,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319999355.0,0,asphalt,,,,152.5828660073439,25.696425912673778
 319999355#1,9025875302,51119951,12,highway.primary,29.988,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,319999355.0,0,asphalt,,,,152.5828660073439,49.85383899684767
@@ -18343,9 +18343,9 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 361403478#0,3658843304,3658843188,1,highway.path,20.016,1,pedestrian bicycle,,361403478.0,0,,,,,209.48885784468015,1761.0363894329319
 361405520#0,3658864916,3658865171,1,highway.path,20.016,1,pedestrian bicycle,,361405520.0,0,,,,,317.51991734793427,1117.3094850659595
 361405520#2,3658865171,3658843188,1,highway.path,20.016,1,pedestrian bicycle,,361405520.0,0,,,,,317.51991734793427,133.89182278541634
-361405521#0,316961225,10911917322,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,asphalt,,,,208.48921346769822,
-361405521#1,10911917322,3658865188,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,asphalt,,,,208.48921346769822,
-361405521#2,3658865188,3658865199,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,asphalt,,,,208.48921346769822,766.4257942602462
+361405521#0,316961225,10911917322,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,ground,,,,208.48921346769822,
+361405521#1,10911917322,3658865188,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,ground,,,,208.48921346769822,
+361405521#2,3658865188,3658865199,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,361405521.0,0,ground,,,,208.48921346769822,766.4257942602462
 361405522#1,4314185944,3658865218,1,highway.path,20.016,1,pedestrian bicycle,,361405522.0,0,,,,,254.3622289532102,231.28956441955472
 361405522#2,3658865218,3658842728,1,highway.path,20.016,1,pedestrian bicycle,,361405522.0,0,,,,,254.3622289532102,142.24100351465177
 361405523,3658842728,277377767,1,highway.path,20.016,1,pedestrian bicycle,,361405523.0,0,,,,,34.62886329339559,1617.339171393386
@@ -19342,7 +19342,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 385383498#3,53275040,53275028,10,highway.tertiary,79.992,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,385383498.0,0,asphalt,,,,341.47715104280127,66.98210117775207
 385383503#0,3887318600,3887318593,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383503.0,0,,,,,289.35720490229403,67.9910414343576
 385383503#1,3887318593,2060495151,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383503.0,0,,,,,289.35720490229403,26.169680433565347
-385383504,3378337635,2060495016,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383504.0,0,asphalt,,,,140.39083827253506,237.81904211184425
+385383504,3378337635,2060495016,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383504.0,0,sett,,,,140.39083827253506,237.81904211184425
 385383505#0,53282932,53282943,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,385383505.0,0,,,,,168.24287298262257,85.10135652634749
 385383505#1,53282943,53282950,3,highway.residential,50.004000000000005,1,,tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,385383505.0,0,,,,,168.24287298262257,92.50749981682205
 385383506,9192777488,3378337267,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,385383506.0,0,ground,,,,252.26987795243224,320.55984337031487
@@ -20053,10 +20053,10 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 456350882,4525945517,4525945509,13,highway.trunk,60.01200000000001,2,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350882.0,0,asphalt,,,no,181.5197789630874,
 456350884,4525945515,4525945509,13,highway.trunk,60.01200000000001,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350884.0,0,asphalt,,,no,184.24073885140066,417.0606315384896
 456350885#1,1922626607,625245,13,highway.trunk,60.01200000000001,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350885.0,0,asphalt,yes,,no,193.89282506099423,438.2331301200862
-456350886,3902552783,625245,13,highway.trunk,60.01200000000001,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350886.0,0,asphalt,,,yes,244.55235155016538,163.4548092318548
+456350886,3902552783,625245,13,highway.trunk,60.01200000000001,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350886.0,0,asphalt,,,no,244.55235155016538,163.4548092318548
 456350887,4526119323,1922626583,13,highway.trunk,39.996,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350887.0,0,asphalt,,,no,67.92984206093685,52.73760238542254
 456350888,3902552770,12076450132,13,highway.trunk,60.01200000000001,2,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350888.0,0,asphalt,,,no,67.92984206093685,90.17171148368477
-456350889,1922626578,3902552783,13,highway.trunk,39.996,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350889.0,0,asphalt,,,yes,244.55235155016538,21.354621408285595
+456350889,1922626578,3902552783,13,highway.trunk,39.996,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350889.0,0,asphalt,,,no,244.55235155016538,21.354621408285595
 456350891,625245,3902552770,13,highway.trunk,60.01200000000001,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350891.0,0,asphalt,,,no,67.92984206093685,22.71769107496326
 456350892,1922628089,1922626578,13,highway.trunk,79.992,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350892.0,0,asphalt,,,yes,215.87468825220725,18.10840472509447
 456350893,1922626600,1922628089,13,highway.trunk,79.992,1,,pedestrian bicycle tram rail_urban rail rail_electric rail_fast ship container cable_car subway aircraft wheelchair scooter drone,456350893.0,0,asphalt,,,yes,295.90202454199994,8.91882320827143
@@ -21477,7 +21477,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 697859714#0,6553855878,6553855880,1,highway.path,20.016,1,pedestrian bicycle,,697859714.0,0,dirt,,,,86.21749863560618,
 697859714#1,6553855880,6553855879,1,highway.path,20.016,1,pedestrian bicycle,,697859714.0,0,dirt,,,,86.21749863560618,
 697859715,3405907649,6553893694,1,highway.path,20.016,1,pedestrian bicycle,,697859715.0,0,dirt,,,,243.4941284286817,94.3730744789413
-697859716#0,6553893715,52831541,1,highway.path,20.016,1,pedestrian bicycle,,697859716.0,0,asphalt,,,,314.0271949394431,724.8104398694642
+697859716#0,6553893715,52831541,1,highway.path,20.016,1,pedestrian bicycle,,697859716.0,0,dirt,,,,314.0271949394431,724.8104398694642
 697859717#0,6553893728,6553893715,1,highway.path,20.016,1,pedestrian bicycle,,697859717.0,0,dirt,,,,243.69605430383052,463.2184321280419
 697859717#1,6553893715,2189430470,1,highway.path,20.016,1,pedestrian bicycle,,697859717.0,0,dirt,,,,243.69605430383052,205.8297685237772
 697859718#0,12201230780,6553893728,1,highway.path,20.016,1,pedestrian bicycle,,697859718.0,0,,,,,127.64161143513147,148.22296137571303
@@ -21531,7 +21531,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 700510995,51581823,5839414327,1,highway.service,20.016,1,pedestrian delivery bicycle,,700510995.0,0,compacted,,,,193.72441633376846,127.8810179448
 700510996,6578420535,6578420533,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700510996.0,0,,yes,,,210.76029442585744,60.05026013856841
 700519371,3417103732,6578497255,1,highway.path,20.016,1,pedestrian bicycle,,700519371.0,0,ground,,,,251.91619609782322,1006.7022277963268
-700519372,6578497246,3268197225,1,highway.path,20.016,1,pedestrian bicycle,,700519372.0,0,asphalt,,,yes,70.52205206151987,1936.4119895078868
+700519372,6578497246,3268197225,1,highway.path,20.016,1,pedestrian bicycle,,700519372.0,0,unhewn_cobblestone,,,yes,70.52205206151987,1936.4119895078868
 700519373,6578497089,3417087313,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700519373.0,0,,,,,156.26643077148427,
 700519374#0,6578497086,6578497085,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700519374.0,0,,,,,225.37420046429085,182.70109160699144
 700519374#1,6578497085,6578468984,1,highway.track,20.016,1,pedestrian motorcycle moped bicycle,,700519374.0,0,,,,,225.37420046429085,
@@ -22615,8 +22615,8 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 973533214,9010247584,7626515112,1,highway.path,20.016,1,pedestrian bicycle,,973533214.0,0,rock,,,,22.55821101147559,976.8971114648082
 974553273,9049988817,5344539561,1,highway.path,20.016,1,pedestrian bicycle,,974553273.0,0,grass,,,,292.24561739860377,50.810625742372444
 974790603,9020981696,9020981697,1,highway.footway,10.008,1,pedestrian,,974790603.0,0,paving_stones,,yes,yes,258.362324657267,39.61416080720149
-974790604,338425486,338425636,1,highway.footway,10.008,1,pedestrian,,974790604.0,0,unhewn_cobblestone,,,yes,306.41208451104836,49.05451158444442
-974790610,338425648,338425715,1,highway.footway,10.008,1,pedestrian,,974790610.0,0,unhewn_cobblestone,,,yes,306.41208451104836,
+974790604,338425486,338425636,1,highway.footway,10.008,1,pedestrian,,974790604.0,0,unhewn_cobblestone,,,no,306.41208451104836,49.05451158444442
+974790610,338425648,338425715,1,highway.footway,10.008,1,pedestrian,,974790610.0,0,unhewn_cobblestone,,,no,306.41208451104836,
 975310869,9025509075,9025509077,1,highway.steps,5.004,1,pedestrian,,975310869.0,0,,,,,356.6369526036773,42.812899523338146
 975311383,4314075482,4314075518,1,highway.path,20.016,1,pedestrian bicycle,,975311383.0,0,,,,,74.41398123747327,516.379084605136
 975313379,2021725882,9025594897,1,highway.service,20.016,1,pedestrian delivery bicycle,,975313379.0,0,,,,,79.0772953135762,25.411980912231137
@@ -22839,7 +22839,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 999487193,9226834176,9226834175,1,highway.footway,10.008,1,pedestrian,,999487193.0,0,,,,,226.8093644902678,4.1455778583760665
 999487194,9227572709,9226834188,1,highway.footway,10.008,1,pedestrian,,999487194.0,0,asphalt,,,yes,63.04588650172998,35.25636930648585
 999487196,9227572711,9226834180,1,highway.footway,10.008,1,pedestrian,,999487196.0,0,,,,,301.0296201441023,4.287963099259875
-999487197,9226884489,12248092804,1,highway.footway,10.008,1,pedestrian,,999487197.0,0,concrete,yes,,yes,110.31485221848597,20.09507891203486
+999487197,9226884489,12248092804,1,highway.footway,10.008,1,pedestrian,,999487197.0,0,concrete,yes,,no,110.31485221848597,20.09507891203486
 999487200,9226834175,9226834188,1,highway.steps,5.004,1,pedestrian,,999487200.0,0,,,,,75.85556961709236,1.550043858805738
 999487201#0,9226834190,9226834180,1,highway.footway,10.008,1,pedestrian,,999487201.0,0,,yes,,yes,316.9888583036494,
 999487201#1,9226834180,9226834175,1,highway.footway,10.008,1,pedestrian,,999487201.0,0,,yes,,yes,316.9888583036494,
@@ -22850,7 +22850,7 @@ sumo_id,from,to,priority,type,speed,lanes,allow,disallow,osmid,has_traffic_light
 999581658#1,9227654998,9227654996,1,highway.footway,10.008,1,pedestrian,,999581658.0,0,concrete,,,,239.98470924359293,12.060903732459682
 999581659#1,9227654996,9227654995,1,highway.footway,10.008,1,pedestrian,,999581659.0,0,concrete,,,,69.74539057828494,
 999581659#2,9227654995,9227675054,1,highway.footway,10.008,1,pedestrian,,999581659.0,0,concrete,,,,69.74539057828494,313.38436379956414
-999581665#1,12201058595,2425469610,1,highway.footway,10.008,1,pedestrian,,999581665.0,0,rubber,yes,,,47.154971249238066,1006.7031822327605
+999581665#1,12201058595,2425469610,1,highway.footway,10.008,1,pedestrian,,999581665.0,0,metal,yes,,,47.154971249238066,1006.7031822327605
 999582097,9227654995,9227622113,1,highway.steps,5.004,1,pedestrian,,999582097.0,0,,,,,8.514404352784227,
 999582098#0,9227622113,12201058675,1,highway.footway,10.008,1,pedestrian,,999582098.0,0,,,,,226.3544573018477,48.06474063991304
 999582098#1,12201058675,9227622111,1,highway.footway,10.008,1,pedestrian,,999582098.0,0,,,,,226.3544573018477,
