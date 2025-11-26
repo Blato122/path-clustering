@@ -7,14 +7,31 @@ import osmnx as ox
 import math
 
 """
-Generate routes CSV for all networks found in a given directory.
+1. Generate routes CSV for all networks found in a given directory.
+    Requires:
+        - <name>.con.xml
+        - <name>.edg.xml
+        - <name>.rou.xml
+        - od_<name>.json
+        - agents.csv
+    Outputs:
+        - <name>_routes.csv
 
-The target use case is generating csv (origin,destination,path,other-features,...) for all
-29 networks from the URB Networks dataset. 
+2. Generate a feature file with SUMO edges as rows and OSM + SUMO columns.
+    Requires:
+        - <name>_routes.
+        - <name>.edg.xml
+        - <name>.net.xml
+        - <name>.csm
+    Outputs:
+        - <name>_merged_edges.csv
 
-Assumptions:
-- Networks can be found under ../data relative to this script by default.
-- Results are written to ../results/routes relative to this script by default.
+3. Enrich merged edges file with newly calculated edge features.
+    Requires:
+        - <name>_routes.csv
+        - <name>_merged_edges.csv
+    Outputs:
+        - <name>_enriched_routes.csv
 """
 
 NUM_SAMPLES = 50       # Number of samples to generate per OD
@@ -22,35 +39,6 @@ NUMBER_OF_PATHS = 3     # Number of paths to find for each origin-destination pa
 BETA = -3.0             # Beta parameter for the path generation
 MAX_ITERATIONS = 50    # Sampler safeguard
 SEED = 42               # For reproducibility
-
-def find_networks(base_dir: Path) -> dict[str, Path]:
-    """
-    Look for network folders under base_dir. 
-    
-    A network directory is valid if it has:
-    - <name>.con.xml
-    - <name>.edg.xml
-    - <name>.rou.xml
-    - od_<name>.json
-    - agents.csv
-    """
-    out = {}
-    if not base_dir.exists():
-        return out
-    for d in base_dir.iterdir():
-        if not d.is_dir():
-            continue
-        name = d.name
-        files = [
-            d / f"{name}.con.xml",
-            d / f"{name}.edg.xml",
-            d / f"{name}.rou.xml",
-            d / f"od_{name}.json",
-            d / "agents.csv"
-        ]
-        if all(file.exists() for file in files):
-            out[name] = d
-    return out
 
 def get_osm_id_from_sumo(sumo_id):
     """
@@ -139,32 +127,40 @@ def get_traffic_light_nodes(net_file):
 
     return tls_nodes
 
-def generate_csv_routes(name: str | Path, dir: str | Path, path_gen_kwargs: dict, results_dir: str | Path) -> None:
+def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results_dir: Path) -> None:
     """
     Generate paths for each OD pair in agents.csv using JanuX.
-    Results are saved in path-clustering/results directory.
+    Results are saved in path-clustering/results/routes directory.
     """
     print(f"\nProcessing network: {name}")
 
-    connection_file_path = f"{dir}/{name}.con.xml"
-    edge_file_path = f"{dir}/{name}.edg.xml"
-    route_file_path = f"{dir}/{name}.rou.xml"
+    required_files = [
+        net_dir / f"{name}.con.xml",
+        net_dir / f"{name}.edg.xml",
+        net_dir / f"{name}.rou.xml",
+        net_dir / f"od_{name}.json",
+        net_dir / "agents.csv"
+    ]
+    
+    if not all(f.exists() for f in required_files):
+        print(f"Skipping {name}: missing required files for route generation")
+        return
 
-    ods = jx.utils.read_json(f"{dir}/od_{name}.json")
+    con_file, edg_file, rou_file, ods_file, agents_file = required_files
+
+    ods = jx.utils.read_json(ods_file)
+    agents = pd.read_csv(agents_file)
     origins = ods["origins"]
     destinations = ods["destinations"]
 
-    # 300 origins and 300 destinations -> 90000 OD pairs -> too long to process!
-    # instead, take agents.csv (order of hundreds)
-    agents = pd.read_csv(f"{dir}/agents.csv")
-    
     all_routes = []
     start_time = time.time()
-    network = jx.build_digraph(connection_file_path, edge_file_path, route_file_path)
+    network = jx.build_digraph(str(con_file), str(edg_file), str(rou_file))
 
+    # 300 origins and 300 destinations -> 90000 OD pairs -> too long to process!
+    # instead, take agents.csv (order of hundreds)
     for o_id, d_id in zip(agents["origin"], agents["destination"]):
         try:
-            # print(o_id, origins[o_id], d_id, destinations[d_id])
             routes = jx.basic_generator(
                 network, 
                 [origins[o_id]], 
@@ -190,12 +186,16 @@ def generate_csv_routes(name: str | Path, dir: str | Path, path_gen_kwargs: dict
     else:
         print(f"No routes generated for {name}")
 
-def generate_feature_files(name: str, net_dir: Path, osm_dir: Path, results_dir: Path) -> None:
-    print("\n=== Extracting SUMO edges for {name} ===")
+def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: Path) -> None:
+    print(f"\n=== Extracting SUMO edges for {name} ===")
 
     edg_file = net_dir / f"{name}.edg.xml"
     net_file = net_dir / f"{name}.net.xml"
     osm_file = osm_dir / f"{name}.osm"
+
+    if not edg_file.exists() or not net_file.exists() or not osm_file.exists():
+        print(f"Skipping {name}: missing files")
+        return
 
     df_sumo = load_sumo_edges_from_edg(edg_file)
     df_sumo["osmid"] = df_sumo["sumo_id"].apply(get_osm_id_from_sumo) # osmid also appears in the osm df
@@ -235,6 +235,7 @@ def generate_feature_files(name: str, net_dir: Path, osm_dir: Path, results_dir:
         on="osmid",
         how="left"
     )
+    df_merged["length"] = df_merged["shape"].apply(compute_length_from_shape)
 
     out_path = results_dir / f"{name}_merged_edges.csv"
     df_merged.to_csv(out_path, index=False)
@@ -242,21 +243,83 @@ def generate_feature_files(name: str, net_dir: Path, osm_dir: Path, results_dir:
     print(f"Merged SUMO + OSM features too {out_path}")
     print(df_merged.head())
 
+def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_dir: Path) -> None:
+    """Compute route features from edge data."""
+    print(f"\n=== Enriching routes for {name} ===")
+    
+    routes_file = routes_dir / f"{name}_routes.csv"
+    edges_file = merged_edges_dir / f"{name}_merged_edges.csv"
+
+    if not routes_file.exists() or not edges_file.exists():
+        print(f"Skipping {name}: missing input files")
+        return
+    
+    routes = pd.read_csv(routes_file)
+    edge_features = pd.read_csv(edges_file)
+    
+    # Prepare edge data
+    NUMERIC_FIELDS = ["length", "speed", "lanes"]
+    for col in NUMERIC_FIELDS:
+        if col in edge_features.columns:
+            edge_features[col] = pd.to_numeric(edge_features[col], errors="coerce")
+    
+    edge_features = edge_features.set_index("sumo_id")
+    
+    def clean_hwy(x):
+        return x.split(".")[-1] if isinstance(x, str) else x
+    
+    edge_features["highway_clean"] = edge_features["highway"].apply(clean_hwy)
+
+    # Compute features for each path
+    HIGHWAY_VALUES = ["motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential"]
+    
+    def compute_features_for_path(path_str):
+        edges = path_str.split(",")
+        # Only select the rows that make up the path (index is sumo_id)
+        df = edge_features.loc[edge_features.index.intersection(edges)] 
+        
+        feature_dict = {
+            "num_edges": len(edges),
+            "total_length": df["length"].sum(skipna=True),
+            "mean_speed": df["speed"].mean(skipna=True),
+        }
+        
+        total_len = feature_dict["total_length"]
+        for hv in HIGHWAY_VALUES:
+            feature_dict[f"pct_{hv}"] = (
+                # Select rows with a given highway type, take the length column and sum the values
+                df.loc[df["highway_clean"] == hv, "length"].sum() / total_len
+                if total_len > 0 else 0.0
+            )
+        
+        feature_dict["num_traffic_lights"] = df["has_traffic_light"].sum()
+        return feature_dict
+    
+    # Enrich and save
+    enriched = pd.concat([routes, routes["path"].apply(compute_features_for_path).apply(pd.Series)], axis=1)
+    out_path = output_dir / f"{name}_routes_enriched.csv"
+    enriched.to_csv(out_path, index=False)
+    print(f"Saved to {out_path}")
+
 def main():
     this_file = Path(__file__).resolve()
     # .../path-clustering/scripts/generate_csv_routes.py -> .../path-clustering
     repo_root = this_file.parents[1]
+
+    # Network data
     data_dir = repo_root / "data"
+    osm_dir = repo_root / "osm"
+
+    # Results
     results_dir = repo_root / "results"
     routes_dir = results_dir / "routes"
     merged_edges_dir = results_dir / "merged_edges"
-    osm_dir = repo_root / "osm"
-    results_dir.mkdir(parents=True, exist_ok=True)
+    enriched_routes_dir = results_dir / "enriched_routes"
 
-    network_dict: dict[str, Path] = find_networks(data_dir)
-    if not network_dict:
-        print("No networks found. Check the directory structure.")
-        return
+    results_dir.mkdir(parents=True, exist_ok=True)
+    routes_dir.mkdir(parents=True, exist_ok=True)
+    merged_edges_dir.mkdir(parents=True, exist_ok=True)
+    enriched_routes_dir.mkdir(parents=True, exist_ok=True)
     
     path_gen_kwargs = {
         "random_seed": SEED,
@@ -266,11 +329,14 @@ def main():
         "verbose": True, # Print the progress of the path generation
     }
 
-    for name, dir in network_dict.items():
+    for d in data_dir.iterdir():
+        if not d.is_dir():
+            continue
+        name = d.name
         # use extended generator? + visualize?
-        # dir same as data_dir?
-        generate_csv_routes(name, dir, path_gen_kwargs, routes_dir)
-        generate_feature_files(name, osm_dir, data_dir, merged_edges_dir)
+        generate_csv_routes(name, data_dir, path_gen_kwargs, routes_dir) # generates routes
+        generate_feature_file(name, data_dir, osm_dir, merged_edges_dir) # generates merged_edges
+        enrich_routes(name, routes_dir, merged_edges_dir, enriched_routes_dir) # uses routes and merged_edges to generate enriched_routes
 
 if __name__ == "__main__":
     main()
