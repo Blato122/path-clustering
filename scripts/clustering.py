@@ -72,7 +72,7 @@ print(df["cluster"].value_counts())
 # -----------------------------
 # Save clustered dataset
 # -----------------------------
-df.to_csv("../results/enriched_routes/beynes_routes_clustered.csv", index=False)
+df.to_csv("../results/clustered_routes/beynes_routes_clustered.csv", index=False)
 
 # -----------------------------
 # UMAP visualization
