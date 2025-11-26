@@ -11,6 +11,7 @@
         to the order of hundreds.
 - generated routes and enriched feature routes for all Ile-de-France cities using JanuX.
 - refactoring
+- fixed some bugs
 
 osm folder - osm files for Ile-de-France cities
 

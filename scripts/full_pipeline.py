@@ -47,20 +47,23 @@ def get_osm_id_from_sumo(sumo_id):
     - "-123456"    → 123456
     - "123456#1"   → 123456
     - "-78910#2"   → 78910
+
+    Ignores internal edges:
+    Usually very short and describe micro-movements inside a junction.
+    Normal edge:     A ----edge1----> [Junction] ----edge2----> B
+    Internal edge:   A ----edge1----> : ----internal----> edge2 ----> B
     """
     # Ignore internal SUMO edges
-    if sumo_id.startswith(":") or not any(c.isdigit() for c in sumo_id): # or make sure all digits?
+    if sumo_id.startswith(":") or not any(c.isdigit() for c in sumo_id):
         return None
     
-    s = sumo_id.lstrip("-")
+    base = sumo_id.split("#")[0] # "-102015882#0" → "-102015882"
+    base = base.lstrip("-") # "-102015882" → "102015882"
     
-    if "#" in sumo_id:
-        s = sumo_id.split("#")[0]
-
     try:
-        return int(s)
+        return int(base)
     except ValueError:
-        return None  # internal SUMO edge, cannot map to OSM
+        return None
     
 def load_sumo_edges_from_edg(edg_file):
     tree = etree.parse(edg_file)
@@ -123,10 +126,37 @@ def get_traffic_light_nodes(net_file):
     root = tree.getroot()
     tls_nodes = set() # junction ids
 
+    # //junction - find all <junction> elements anywhere in the document
+    # [@type='traffic_light'] - where attribute type is traffic_light
+    # e.g. <junction id="241790299" type="traffic_light" x="2964.06" y="4630.25" ...>
     for junc in root.xpath("//junction[@type='traffic_light']"):
         tls_nodes.add(junc.get("id"))
 
+    # e.g. <tlLogic id="370504753" type="static" programID="0" offset="0">
+    for tl in root.xpath("//tlLogic"):
+        tls_nodes.add(tl.get("id"))
+
     return tls_nodes
+
+def count_turns(df, turn_threshold_deg=30):
+    """Count significant direction changes for a given path"""
+
+    bearings = df["bearing"].dropna().values
+    if len(bearings) < 2:
+        return 0
+    
+    turns = 0
+    for i in range(1, len(bearings)):
+        angle = abs(bearings[i] - bearings[i-1]) # e.g. 90 - 45 (already in degrees)
+        if angle > 180:
+            angle = 360 - angle
+        if angle > turn_threshold_deg:
+            turns += 1
+
+    return turns
+
+def compute_sinuosity(path):
+    pass
 
 def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results_dir: Path) -> None:
     """
@@ -200,34 +230,39 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
 
     df_sumo = load_sumo_edges_from_edg(edg_file)
     df_sumo["osmid"] = df_sumo["sumo_id"].apply(get_osm_id_from_sumo) # osmid also appears in the osm df
-    traffic_light_nodes = get_traffic_light_nodes(net_file)
-    df_sumo["has_traffic_light"] = df_sumo["to"].isin(traffic_light_nodes).astype(int)
-    # df_sumo.to_csv("sumo_edges.csv", index=False)
-    # print("SUMO edges extracted to sumo_edges.csv")
+    df_sumo["has_traffic_light"] = df_sumo["to"].isin(get_traffic_light_nodes(net_file)).astype(int)
+    df_sumo["speed"] *= 3.6 # maxspeed, originally in m/s
     print(df_sumo.head())
+    print(df_sumo.columns)
 
     print("\n=== Loading OSM with OSMnx ===")
 
+    # Surface and lit are not included by default!
+    ox.settings.useful_tags_way = list(ox.settings.useful_tags_way) + ["surface", "lit"]
     G = ox.graph_from_xml(osm_file)
+    # add compass direction (angle) between two consecutive points
+    # bearing changing frequently ---> winding route, consistent bearing ---> straight route
+    G = ox.bearing.add_edge_bearings(G)
     _ , edges_osm = ox.graph_to_gdfs(G)
     # some osmid values can be lists - explode so as not to lose any edges
     # reset_index() because after exploding, new rows share the same index
     edges_osm_exploded = edges_osm.explode("osmid").reset_index(drop=True)
 
     # ? flatten list attributes if they appear
-    osm_cols_to_keep = ["highway", "maxspeed", "lanes"] # add more?
+    # add more? lanes also in sumo so not needed here? same for highway
+    # and maxspeed is also there in sumo cols...
+    osm_cols_to_keep = ["surface", "bridge", "tunnel", "lit", "bearing"]
     for col in osm_cols_to_keep:
         if col in edges_osm_exploded.columns:
             edges_osm_exploded[col] = edges_osm_exploded[col].apply(lambda x: x[0] if isinstance(x, list) else x)
 
-    # edges_osm.to_csv("osm_edges.csv", index=False)
-    # print("OSM edges extracted to osm_edges.csv")
     print(edges_osm_exploded[["osmid", *osm_cols_to_keep]].head())
 
     print("\n=== Merging SUMO edges with OSM features ===")
 
     # if multiple edges have the same id, take the 1st one
     edges_osm_unique = edges_osm_exploded.groupby("osmid")[osm_cols_to_keep].first().reset_index()
+    print(edges_osm_unique.columns)
 
     # Left join: keep all SUMO edges, attach OSM info where matches exist
     df_merged = pd.merge(
@@ -237,11 +272,12 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
         how="left"
     )
     df_merged["length"] = df_merged["shape"].apply(compute_length_from_shape)
+    df_merged = df_merged.drop(columns=["shape"]) # big and not used in enrich anyway
 
     out_path = results_dir / f"{name}_merged_edges.csv"
     df_merged.to_csv(out_path, index=False)
 
-    print(f"Merged SUMO + OSM features too {out_path}")
+    print(f"Merged SUMO + OSM features to {out_path}")
     print(df_merged.head())
 
 def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_dir: Path) -> None:
@@ -259,7 +295,7 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_di
     edge_features = pd.read_csv(edges_file)
     
     # Prepare edge data
-    NUMERIC_FIELDS = ["length", "speed", "lanes"]
+    NUMERIC_FIELDS = ["length", "speed", "lanes", "priority", "bearing"]
     for col in NUMERIC_FIELDS:
         if col in edge_features.columns:
             edge_features[col] = pd.to_numeric(edge_features[col], errors="coerce")
@@ -271,31 +307,78 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_di
             return "unknown"
         return x.split(".")[-1] if isinstance(x, str) else x
     
-    edge_features["highway_clean"] = edge_features["highway"].apply(clean_hwy)
-
-    # Compute features for each path
-    HIGHWAY_VALUES = ["motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential"]
+    edge_features["type_clean"] = edge_features["type"].apply(clean_hwy)
     
     def compute_features_for_path(path_str):
         edges = path_str.split(",")
         # Only select the rows that make up the path (index is sumo_id)
         df = edge_features.loc[edge_features.index.intersection(edges)] 
+
+        # Handle empty dataframe
+        if df.empty:
+            return {
+                "num_edges": len(edges),
+                "total_length": 0.0,
+                "mean_speed": 0.0,
+                "pct_paved": 0.0,
+                "pct_unpaved": 0.0,
+                **{f"pct_{hv}": 0.0 for hv in ["motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential"]},
+                "pct_lit": 0.0,
+                "bearing_variance": 0.0,
+                "mean_bearing": 0.0,
+                "num_turns": 0,
+                "num_bridges": 0,
+                "num_tunnels": 0,
+                "speed_std": 0.0,
+                "speed_range": 0.0,
+                "lane_changes": 0.0,
+                "priority_changes": 0.0,
+                "num_traffic_lights": 0,
+            }
         
         feature_dict = {
             "num_edges": len(edges),
             "total_length": df["length"].sum(skipna=True),
             "mean_speed": df["speed"].mean(skipna=True),
         }
-        
         total_len = feature_dict["total_length"]
+        
+        PAVED_SURFACES = ["asphalt", "paved", "concrete", "bricks", "sett", "grass_paver", "paving_stones"]
+        feature_dict["pct_paved"] = (
+            df.loc[df["surface"].isin(PAVED_SURFACES), "length"].sum() / total_len
+            if total_len > 0 else 0.0
+        )
+
+        UNPAVED_SURFACES = ["sand", "gravel", "dirt", "compacted"]
+        feature_dict["pct_unpaved"] = (
+            df.loc[df["surface"].isin(UNPAVED_SURFACES), "length"].sum() / total_len
+            if total_len > 0 else 0.0
+        )
+
+        HIGHWAY_VALUES = ["motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential"]
         for hv in HIGHWAY_VALUES:
             feature_dict[f"pct_{hv}"] = (
                 # Select rows with a given highway type, take the length column and sum the values
-                df.loc[df["highway_clean"] == hv, "length"].sum() / total_len
+                df.loc[df["type_clean"] == hv, "length"].sum() / total_len
                 if total_len > 0 else 0.0
             )
-        
-        feature_dict["num_traffic_lights"] = df["has_traffic_light"].sum()
+
+        feature_dict["pct_lit"] = (
+            df.loc[df["lit"] == "yes", "length"].sum() / total_len
+            if total_len > 0 else 0.0
+        )
+
+        # Bearing variance (high = winding route, low = straight) ~ sinuosity?
+        feature_dict["bearing_variance"] = df["bearing"].var(skipna=True)
+        feature_dict["mean_bearing"] = df["bearing"].mean(skipna=True)  
+        feature_dict["num_turns"] = count_turns(df) # copy not needed, df isn't modified      
+        feature_dict["num_bridges"] = df["bridge"].notna().sum(skipna=True)
+        feature_dict["num_tunnels"] = df["tunnel"].notna().sum(skipna=True)
+        feature_dict["speed_std"] = df["speed"].std(skipna=True)
+        feature_dict["speed_range"] = df["speed"].max(skipna=True) - df["speed"].min(skipna=True)
+        feature_dict["lane_changes"] = df["lanes"].diff().abs().sum(skipna=True)
+        feature_dict["priority_changes"] = df["priority"].diff().abs().sum(skipna=True)
+        feature_dict["num_traffic_lights"] = df["has_traffic_light"].sum(skipna=True)
         return feature_dict
     
     # Enrich and save
@@ -308,12 +391,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="Pipeline to generate and enrich route data from SUMO networks",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python full_pipeline.py --all                    # Run all stages
-  python full_pipeline.py --routes --features      # Run first two stages only
-  python full_pipeline.py --enrich                 # Only enrich (assumes routes and features exist)
-        """
     )
     
     parser.add_argument(
@@ -338,6 +415,9 @@ Examples:
     )
     
     args = parser.parse_args()
+    if not any(vars(args).values()):
+        print("No arguments provided. Use -h for help.")
+        return
     if args.all:
         args.routes = args.features = args.enrich = True
 
@@ -366,12 +446,18 @@ Examples:
         "verbose": True, # Print the progress of the path generation
     }
 
+    stages = [
+        name for name, enabled in [
+            ("routes", args.routes),
+            ("features", args.features),
+            ("enrich", args.enrich),
+        ] if enabled
+    ]
+    stage_str = ", ".join(stages) if stages else ""
+
     print(
         f"\n{'='*60}\n"
-        f"Running pipeline stages: "
-        f"{'routes' if args.routes else ''}, "
-        f"{'features' if args.features else ''}, "
-        f"{'enrich' if args.enrich else ''}\n"
+        f"Running pipeline stages: {stage_str}\n"
         f"{'='*60}\n"
     )
 
