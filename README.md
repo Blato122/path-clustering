@@ -13,6 +13,8 @@
 - added many new features (bearing_std, pct_paved, num_turns, ...)
 - refactoring
 - fixed some bugs
+- added basic clustering script
+
 
 osm folder - osm files for Ile-de-France cities
 
