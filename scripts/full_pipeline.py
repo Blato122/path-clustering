@@ -5,6 +5,7 @@ import pandas as pd
 from lxml import etree
 import osmnx as ox
 import math
+import argparse
 
 """
 1. Generate routes CSV for all networks found in a given directory.
@@ -135,11 +136,11 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results
     print(f"\nProcessing network: {name}")
 
     required_files = [
-        net_dir / f"{name}.con.xml",
-        net_dir / f"{name}.edg.xml",
-        net_dir / f"{name}.rou.xml",
-        net_dir / f"od_{name}.json",
-        net_dir / "agents.csv"
+        net_dir / name / f"{name}.con.xml",
+        net_dir / name / f"{name}.edg.xml",
+        net_dir / name / f"{name}.rou.xml",
+        net_dir / name / f"od_{name}.json",
+        net_dir / name / "agents.csv"
     ]
     
     if not all(f.exists() for f in required_files):
@@ -189,8 +190,8 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results
 def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: Path) -> None:
     print(f"\n=== Extracting SUMO edges for {name} ===")
 
-    edg_file = net_dir / f"{name}.edg.xml"
-    net_file = net_dir / f"{name}.net.xml"
+    edg_file = net_dir / name / f"{name}.edg.xml"
+    net_file = net_dir / name / f"{name}.net.xml"
     osm_file = osm_dir / f"{name}.osm"
 
     if not edg_file.exists() or not net_file.exists() or not osm_file.exists():
@@ -266,6 +267,8 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_di
     edge_features = edge_features.set_index("sumo_id")
     
     def clean_hwy(x):
+        if pd.isna(x):
+            return "unknown"
         return x.split(".")[-1] if isinstance(x, str) else x
     
     edge_features["highway_clean"] = edge_features["highway"].apply(clean_hwy)
@@ -302,6 +305,42 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_di
     print(f"Saved to {out_path}")
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Pipeline to generate and enrich route data from SUMO networks",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python full_pipeline.py --all                    # Run all stages
+  python full_pipeline.py --routes --features      # Run first two stages only
+  python full_pipeline.py --enrich                 # Only enrich (assumes routes and features exist)
+        """
+    )
+    
+    parser.add_argument(
+        "--all", 
+        action="store_true", 
+        help="Run all pipeline stages (routes, features, enrich)"
+    )
+    parser.add_argument(
+        "--routes", 
+        action="store_true", 
+        help="Generate routes CSV files using JanuX"
+    )
+    parser.add_argument(
+        "--features", 
+        action="store_true", 
+        help="Generate merged edge feature files (SUMO + OSM)"
+    )
+    parser.add_argument(
+        "--enrich", 
+        action="store_true", 
+        help="Enrich routes with calculated features"
+    )
+    
+    args = parser.parse_args()
+    if args.all:
+        args.routes = args.features = args.enrich = True
+
     this_file = Path(__file__).resolve()
     # .../path-clustering/scripts/generate_csv_routes.py -> .../path-clustering
     repo_root = this_file.parents[1]
@@ -316,10 +355,8 @@ def main():
     merged_edges_dir = results_dir / "merged_edges"
     enriched_routes_dir = results_dir / "enriched_routes"
 
-    results_dir.mkdir(parents=True, exist_ok=True)
-    routes_dir.mkdir(parents=True, exist_ok=True)
-    merged_edges_dir.mkdir(parents=True, exist_ok=True)
-    enriched_routes_dir.mkdir(parents=True, exist_ok=True)
+    for d in [results_dir, routes_dir, merged_edges_dir, enriched_routes_dir]:
+        d.mkdir(parents=True, exist_ok=True)
     
     path_gen_kwargs = {
         "random_seed": SEED,
@@ -329,14 +366,22 @@ def main():
         "verbose": True, # Print the progress of the path generation
     }
 
+    print(
+        f"\n{'='*60}\n"
+        f"Running pipeline stages: "
+        f"{'routes' if args.routes else ''}, "
+        f"{'features' if args.features else ''}, "
+        f"{'enrich' if args.enrich else ''}\n"
+        f"{'='*60}\n"
+    )
+
     for d in data_dir.iterdir():
         if not d.is_dir():
             continue
         name = d.name
-        # use extended generator? + visualize?
-        generate_csv_routes(name, data_dir, path_gen_kwargs, routes_dir) # generates routes
-        generate_feature_file(name, data_dir, osm_dir, merged_edges_dir) # generates merged_edges
-        enrich_routes(name, routes_dir, merged_edges_dir, enriched_routes_dir) # uses routes and merged_edges to generate enriched_routes
+        if args.routes: generate_csv_routes(name, data_dir, path_gen_kwargs, routes_dir) # generates routes
+        if args.features: generate_feature_file(name, data_dir, osm_dir, merged_edges_dir) # generates merged_edges
+        if args.enrich: enrich_routes(name, routes_dir, merged_edges_dir, enriched_routes_dir) # uses routes and merged_edges to generate enriched_routes
 
 if __name__ == "__main__":
     main()
