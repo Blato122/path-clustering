@@ -1,9 +1,9 @@
 ## Progress:
-### * 13.11.2025:
+### 13.11.2025:
 - exploring COeXISTENCE repos, learning to use JanuX
-### * 20.11.2025:
+### 20.11.2025:
 - enriched feature generation
-### * 27.11.2025:
+### 27.11.2025:
 - downloaded osm files for Ile-de-France cities (instead of using Andorra for testing).
 - changed path generation approach with Janux - instead of calculating a path for each OD
         pair, we now only do it for the OD pairs specified in agents.csv files. This allows for
@@ -14,6 +14,10 @@
 - refactoring
 - fixed some bugs
 - added basic clustering script
+### 05.12.2025 (no meeting):
+- refactoring
+- added new features (such as circuity)
+- added comments clarifying feature enrichment 
 
 
 osm folder - osm files for Ile-de-France cities
