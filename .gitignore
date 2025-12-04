@@ -4,4 +4,5 @@ scripts/__pycache__
 # .vscode
 osm
 scripts/other.py
+scripts/test.py
 scripts/check_coverage.py

@@ -6,7 +6,6 @@ from lxml import etree
 import osmnx as ox
 import math
 import argparse
-from geopy import distance # or pyproj?
 
 """
 1. Generate routes CSV for all networks found in a given directory.
@@ -78,7 +77,20 @@ def get_osm_id_from_sumo(sumo_id):
     except ValueError:
         return None
     
-def load_sumo_edges_from_edg(edg_file):
+def load_sumo_nodes(nod_file: Path) -> dict:
+    """Parses .nod.xml to get a mapping of node_id -> (x, y)."""
+    tree = etree.parse(nod_file)
+    root = tree.getroot()
+    node_coords = {}
+    for node in root.xpath("//node"):
+        nid = node.get("id")
+        x = node.get("x")
+        y = node.get("y")
+        if x and y:
+            node_coords[nid] = (float(x), float(y))
+    return node_coords
+
+def load_sumo_edges(edg_file: Path) -> pd.DataFrame:
     tree = etree.parse(edg_file)
     root = tree.getroot()
 
@@ -124,17 +136,6 @@ def load_sumo_edges_from_edg(edg_file):
 
     return pd.DataFrame(records)
 
-def compute_length_from_shape(coords):
-    """Serves as a fallback when OSM length is unavailable"""
-    if not coords or len(coords) < 2:
-        return None
-    total = 0
-    for i in range(1, len(coords)):
-        x0, y0 = coords[i-1]
-        x1, y1 = coords[i]
-        total += math.hypot(x1 - x0, y1 - y0)
-    return total
-
 def get_traffic_light_nodes(net_file):
     tree = etree.parse(net_file)
     root = tree.getroot()
@@ -173,7 +174,7 @@ def count_turns(df, turn_threshold_deg=30):
     #         turns += 1
 
     diffs = df["bearing"].dropna().diff().abs()
-    diffs = diffs.where(diffs <= 180, 360 - diffs)
+    diffs = diffs.where(diffs <= 180, 360 - diffs) # replace values where the condition is false
     return (diffs > turn_threshold_deg).sum()
 
 def calculate_circuity(df, total_len):
@@ -208,26 +209,47 @@ def calculate_circuity(df, total_len):
         return None
 
     # Use first/last present in df (guaranteed to follow path order because of reindex)
-    try:
-        first_edge_id = df.index[0]
-        last_edge_id = df.index[-1]
-    except Exception:
-        return None
-
-    # .at -> fast scalar access
-    try:
-        lon1 = float(df.at[first_edge_id, "from_lon"])
-        lat1 = float(df.at[first_edge_id, "from_lat"])
-        lon2 = float(df.at[last_edge_id,  "to_lon"])
-        lat2 = float(df.at[last_edge_id,  "to_lat"])
-    except Exception:
-        return None
+    x1 = float(df["start_x"].iloc[0])
+    y1 = float(df["start_y"].iloc[0])
+    x2 = float(df["end_x"].iloc[-1])
+    y2 = float(df["end_y"].iloc[-1])
     
-    straight_len = distance.great_circle((lat1, lon1), (lat2, lon2)).m
-    if straight_len == 0 or straight_len is None:
+    # Euclidean distance for straight line (consistent with SUMO projection)
+    straight_len = math.hypot(x2-x1, y2-y1)
+
+    if straight_len == 0:
         return None
 
     return total_len / straight_len
+
+def compute_sumo_length(shape: list[tuple[float, float]]) -> float:
+    """
+    Computes length of a SUMO edge based on its shape.
+    Because SUMO shape data is in meters (projected x/y coordinates instead of lat/lon, e.g. 123.02, 652.14),
+    we calculate just the Euclidean distance.
+    """
+    total = 0.0
+    for i in range(len(shape)-1):
+        # geopy expects (lat, lon), SUMO shape is (lon, lat)
+        x1, y1 = shape[i]
+        x2, y2 = shape[i+1]
+        # Euclidean distance: sqrt((x2-x1)^2 + (y2-y1)^2)
+        total += math.hypot(x2-x1, y2-y1)
+    return total
+
+def compute_sumo_bearing(shape: list[tuple[float, float]]) -> float | None:
+    """
+    Computes bearing - the general direction of the edge (in degrees).
+    Only uses the straight line direction between the first and the last node.
+    0 = north, 90 = east, 180 = south, 270 = west
+    """
+    start = shape[0]
+    end = shape[-1]
+    dx = end[0] - start[0] # change in easting
+    dy = end[1] - start[1] # change in northing
+    # atan2(dx, dy) gives angle from north (Y-axis) clockwise
+    angle = math.degrees(math.atan2(dx, dy))
+    return (angle + 360) % 360
 
 def safe_div(num: float, den: float) -> float:
     return float(num) / float(den) if den > 0 else 0.0
@@ -237,7 +259,7 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results
     Generate paths for each OD pair in agents.csv using JanuX.
     Results are saved in path-clustering/results/routes directory.
     """
-    print(f"\nProcessing network: {name}")
+    print(f"\n=== Generating routes for {name} ===")
 
     required_files = [
         net_dir / name / f"{name}.con.xml",
@@ -292,9 +314,10 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results
         print(f"No routes generated for {name}")
 
 def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: Path) -> None:
-    print(f"\n=== Extracting SUMO edges for {name} ===")
+    print(f"\n=== Generating feature file for {name} ===")
 
     edg_file = net_dir / name / f"{name}.edg.xml"
+    nod_file = net_dir / name / f"{name}.nod.xml"
     net_file = net_dir / name / f"{name}.net.xml"
     osm_file = osm_dir / f"{name}.osm"
 
@@ -302,7 +325,49 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
         print(f"Skipping {name}: missing files")
         return
 
-    df_sumo = load_sumo_edges_from_edg(edg_file)
+    # Final approach:
+
+    # OSM Way - represents a "logical road entity" (e.g. main street), keyed by osmid.
+    # Such OSM Way objects may consist of multiple edges - straight lines connecting consecutive nodes - 
+    # smallest possible segments. Edges are keyed by their start and target nodes as well as an extra number. 
+    # However, OSMnx simplifies edges. What this means:
+    """
+    This simplifies the graph's topology by removing all nodes that are not intersections or dead-ends, 
+    by creating an edge directly between the end points that encapsulate them while retaining the 
+    full geometry of the original edges, saved as a new geometry attribute on the new edge.
+    """
+    # SUMO - some internal splitting algorithm, neither an edge nor a Way.
+    # However, SUMO segment ids generally correspond to OSM Way ids, it's just that SUMO divides 
+    # them into multiple sub-Ways.
+
+    # The result is that there is no 1:1 mapping based on ids alone.
+    # Disabling graph simplification wouldn't help either because then we would get multiple edges
+    # per one SUMO sub-Way.
+
+    # The solution is to calculate geometric features based on SUMO (e.g. length, bearing, circuity, num_turns)
+    # And get "semantic" features from OSM (e.g. lit, surface, tunnel, bridge, highway_type) because they apply
+    # to the entire Way anyway and thus to all SUMO sub-Ways that were created from it.
+    # When it comes to, say, distance, we cannot use the same approach because then, if the Way is 100 m long
+    # and SUMO divides it into 2 sub-Ways with ids (e.g. 123#1, 123#2) that point to the same OSM Way id (e.g. 123)
+    # it means they both are assigned this length and we get 200 m instead of 100 m.
+
+    df_sumo = load_sumo_edges(edg_file)
+    sumo_node_coords = load_sumo_nodes(nod_file)
+
+    def fill_shape(row):
+        if row["shape"] is not None:
+            return row["shape"]
+        u, v = row["from"], row["to"]
+        if u in sumo_node_coords and v in sumo_node_coords:
+            return [sumo_node_coords[u], sumo_node_coords[v]]
+        return None # should not happen if data is consistent
+    
+    df_sumo["shape"] = df_sumo.apply(fill_shape, axis=1)
+    dropped = df_sumo["shape"].isna().sum()
+    df_sumo = df_sumo.dropna(subset=["shape"])
+    if dropped:
+        print(f"Dropped {dropped} rows - shape missing")
+
     df_sumo["osmid"] = df_sumo["sumo_id"].apply(get_osm_id_from_sumo) # osmid also appears in the osm df
     df_sumo["has_traffic_light"] = df_sumo["to"].isin(get_traffic_light_nodes(net_file)).astype(int)
     def clean_hwy(x):
@@ -310,9 +375,22 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
             return "unknown"
         return x.split(".")[-1] if isinstance(x, str) else x
     df_sumo["type_clean"] = df_sumo["type"].apply(clean_hwy)
-    df_sumo["speed"] *= 3.6 # maxspeed, originally in m/s
+    df_sumo["speed"] = df_sumo["speed"].astype(float) * 3.6  # maxspeed, originally in m/s
+    df_sumo["length"] = df_sumo["shape"].apply(compute_sumo_length)
+    df_sumo["bearing"] = df_sumo["shape"].apply(compute_sumo_bearing)
+
+    # Extract start/end coordinates for circuity calculation later
+    # Use these instead of OSM nodes because SUMO edges are splits of OSM ways
+    def get_coords(shape):
+        return shape[0][0], shape[0][1], shape[-1][0], shape[-1][1]
+    coords = df_sumo["shape"].apply(get_coords).apply(pd.Series).astype(float)
+    df_sumo[["start_x", "start_y", "end_x", "end_y"]] = coords    
+
+    df_sumo = df_sumo.drop(columns=["shape"]) # big and not used later -> drop
 
     # Surface and lit are not included by default!
+    # Default is ["access", "area", "bridge", "est_width", "highway", "junction", "landuse", 
+    # "lanes", "maxspeed", "name", "oneway", "ref", "service", "tunnel", "width"]
     ox.settings.useful_tags_way = list(ox.settings.useful_tags_way) + ["surface", "lit"]
     # In OSM files, each <way> contains a sequence of node references: <nd ref="..."/>, e.g.
     # <way id="22561497" version="11" timestamp="2021-09-11T20:13:25Z">
@@ -325,32 +403,28 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
     # Add compass direction (angle) for each edge (between points A and B)
     # Ignores intermediate points (works on straight lines)
     # Bearing changing frequently -> winding route, consistent bearing -> straight route
-    G = ox.bearing.add_edge_bearings(G)
-    nodes_osm , edges_osm = ox.graph_to_gdfs(G)
+    # G = ox.bearing.add_edge_bearings(G)
+    # nodes are identified by OSM ID and each must contain a data attribute dictionary that must have “x” and “y” keys defining its coordinates
+    # edges are identified by a 3-tuple of “u” (source node ID), “v” (target node ID), and “key” (to differentiate parallel edges), 
+    # and each must contain a data attribute dictionary that must have an “osmid” key defining its OSM ID and a “length” key defining its length in meters
+    _, edges_osm = ox.graph_to_gdfs(G) # 10108 rows for beynes
+    # print(edges_osm)
     # Some osmid values can be lists - explode so as not to lose any edges
     # reset_index() because after exploding, new rows share the same index
-    edges_osm_exploded = edges_osm.explode("osmid").reset_index(drop=True)
+    # NO drop=True because u and v, which are needed later, become columns!
+    edges_osm_exploded = edges_osm.explode("osmid").reset_index() # 10557 rows for beynes
+    # print(edges_osm_exploded)
     # Already in SUMO: lanes, highway (type), maxspeed (speed)
-    # Keep the length instead of calculating it by hand (like before)
     # OSMnx length accounts for Earth's curvature instead of calculating simple Euclidean distances
-    # u and v - source and target node IDs
-    osm_cols_to_keep = ["u", "v", "surface", "bridge", "tunnel", "lit", "bearing", "length"]
+    # BUT it has to be excluded! Each edge has a length but sumo might split an edge into
+    # multiple segments, all pointing to the same edge osmid. They all get the same length
+    # while in reality it should be their sum.
+    osm_cols_to_keep = ["surface", "bridge", "tunnel", "lit"] #, "bearing", "length", "u", "v"]
     # If multiple edges have the same id, take the 1st one (???)
-    edges_osm_unique = edges_osm_exploded.groupby("osmid")[osm_cols_to_keep].first().reset_index()
+    edges_osm_unique = edges_osm_exploded.groupby("osmid")[osm_cols_to_keep].first().reset_index() # 1272 rows for beynes
+    # print(edges_osm_unique)
     for col in osm_cols_to_keep:
         edges_osm_unique[col] = edges_osm_unique[col].apply(lambda x: x[0] if isinstance(x, list) else x)
-
-    # For calculating circuity (node coords required):
-    nodes_osm = nodes_osm.reset_index()
-    # Extract just the coords:
-    node_coords = nodes_osm.set_index("osmid")[["x", "y"]] # x=lon, y=lat
-    # Like node_coords.loc[edges_osm_unique["u"], "x"] but works well with
-    # duplicate "u" indices
-    # node_coords is indexed by osmid
-    edges_osm_unique["from_lon"] = edges_osm_unique["u"].map(node_coords["x"])
-    edges_osm_unique["from_lat"] = edges_osm_unique["u"].map(node_coords["y"])
-    edges_osm_unique["to_lon"]   = edges_osm_unique["v"].map(node_coords["x"])
-    edges_osm_unique["to_lat"]   = edges_osm_unique["v"].map(node_coords["y"])
 
     # Left join: keep all SUMO edges, attach OSM info where matches exist
     df_merged = pd.merge(
@@ -359,11 +433,6 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
         on="osmid",
         how="left"
     )
-    # After merging, handle missing lengths:
-    df_merged["length"] = df_merged["length"].fillna(
-        df_merged["shape"].apply(compute_length_from_shape)
-    )
-    df_merged = df_merged.drop(columns=["shape"]) # big and not used in enrich anyway
 
     out_path = results_dir / f"{name}_merged_edges.csv"
     df_merged.to_csv(out_path, index=False)
@@ -392,39 +461,61 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_di
         # Drop rows that are completely missing
         path_df = path_df.dropna(how="all")
         total_len = path_df["length"].sum(skipna=True)
+        total_len_km = total_len / 1000.0
 
         feature_dict = {}
         # Basic features
-        feature_dict["num_edges"] = len(edges)
         feature_dict["total_length"] = total_len
         # Speed
         feature_dict["mean_speed"] = path_df["speed"].mean(skipna=True)
         feature_dict["speed_std"] = path_df["speed"].std(skipna=True)
         feature_dict["speed_range"] = path_df["speed"].max(skipna=True) - path_df["speed"].min(skipna=True)
+        feature_dict["pct_high_speed"] = safe_div(
+            path_df.loc[path_df["speed"] > 50, "length"].sum(skipna=True),
+            total_len
+        )
         # Surface type
         PAVED_SURFACES = ["asphalt", "paved", "concrete", "bricks", "sett", "grass_paver", "paving_stones"]
         UNPAVED_SURFACES = ["sand", "gravel", "dirt", "compacted"]
-        feature_dict["pct_paved"] = safe_div(path_df.loc[path_df["surface"].isin(PAVED_SURFACES), "length"].sum(skipna=True), total_len)
-        feature_dict["pct_unpaved"] = safe_div(path_df.loc[path_df["surface"].isin(UNPAVED_SURFACES), "length"].sum(skipna=True), total_len)
+        feature_dict["pct_paved"] = safe_div(
+            path_df.loc[path_df["surface"].isin(PAVED_SURFACES), "length"]
+            .sum(skipna=True), 
+            total_len
+        )
+        feature_dict["pct_unpaved"] = safe_div(
+            path_df.loc[path_df["surface"].isin(UNPAVED_SURFACES), "length"]
+            .sum(skipna=True), 
+            total_len
+        )
         # Road class
         HIGHWAY_VALUES = ["motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential"]
         for hv in HIGHWAY_VALUES:
-            feature_dict[f"pct_{hv}"] = safe_div(path_df.loc[path_df["type_clean"] == hv, "length"].sum(skipna=True), total_len)
+            feature_dict[f"pct_{hv}"] = safe_div(
+                path_df.loc[path_df["type_clean"] == hv, "length"]
+                .sum(skipna=True), 
+                total_len
+            )
         # Lit?
-        feature_dict["pct_lit"] = safe_div(path_df.loc[path_df["lit"] == "yes", "length"].sum(skipna=True), total_len)
+        feature_dict["pct_lit"] = safe_div(
+            path_df.loc[path_df["lit"] == "yes", "length"]
+            .sum(skipna=True), 
+            total_len
+        )
         # Lane/priotity changes, yieldings
-        feature_dict["lane_changes"] = path_df["lanes"].diff().abs().sum(skipna=True)
-        feature_dict["priority_changes"] = path_df["priority"].diff().abs().sum(skipna=True)
-        feature_dict["yield_priority_changes"] = path_df["priority"].diff().lt(0).sum(skipna=True)
-        feature_dict["num_traffic_lights"] = path_df["has_traffic_light"].sum(skipna=True)
+        feature_dict["lane_changes_per_km"] = safe_div(path_df["lanes"].diff().abs().sum(skipna=True), total_len_km)
+        feature_dict["priority_changes_per_km"] = safe_div(path_df["priority"].diff().abs().sum(skipna=True), total_len_km) # number of priority changes or their total value? total value says more I think???
+        feature_dict["yield_priority_changes_per_km"] = safe_div(path_df["priority"].diff().lt(0).sum(skipna=True), total_len_km)
+        feature_dict["traffic_lights_per_km"] = safe_div(path_df["has_traffic_light"].sum(skipna=True), total_len_km)
         # Structures
-        feature_dict["num_bridges"] = path_df["bridge"].notna().sum(skipna=True)
-        feature_dict["num_tunnels"] = path_df["tunnel"].notna().sum(skipna=True)
-        # Road shape, turns
+        feature_dict["bridges_per_km"] = safe_div(path_df["bridge"].notna().sum(skipna=True), total_len_km)
+        feature_dict["tunnels_per_km"] = safe_div(path_df["tunnel"].notna().sum(skipna=True), total_len_km)
+        # Road geometry: shape, turns, ...
         feature_dict["bearing_std"] = path_df["bearing"].std(skipna=True) # bearing variance (high = winding route, low = straight)
-        feature_dict["num_turns"] = count_turns(path_df) # copy not needed, df isn't modified
+        feature_dict["turns_per_km"] = safe_div(count_turns(path_df), total_len_km) # copy not needed, df isn't modified
         feature_dict["mean_circuity"] = calculate_circuity(path_df, total_len) # copy not needed, df isn't modified 
-        
+        feature_dict["edge_length_std"] = path_df["length"].std(skipna=True) # Urban centers tend to have many short edges (blocks). Highways have long, consistent edges. High variance might indicate a route that transitions between highway and city.
+        feature_dict["edges_per_km"] = safe_div(len(edges), total_len_km)
+
         return feature_dict
 
     # Enrich and save
@@ -436,7 +527,6 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, output_di
 def main():
     parser = argparse.ArgumentParser(
         description="Pipeline to generate and enrich route data from SUMO networks",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     
     parser.add_argument(
@@ -509,7 +599,7 @@ def main():
     print(
         f"\n{'='*60}\n"
         f"Running pipeline stages: {stage_str}\n"
-        f"{'='*60}\n"
+        f"{'='*60}"
     )
 
     names = set(s.strip().lower() for s in args.name) if args.name else None

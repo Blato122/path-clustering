@@ -13,11 +13,13 @@
 - added many new features (bearing_std, pct_paved, num_turns, ...)
 - refactoring
 - fixed some bugs
-- added basic clustering script
-### 05.12.2025 (no meeting):
-- refactoring
+- added a basic clustering script
+### 04.12.2025 (no meeting):
 - added new features (such as circuity)
-- added comments clarifying feature enrichment 
+- refactoring + comments clarifying feature enrichment 
+- fixed data duplication bug
+- added normalzation of some features
+### 11.12.2025:
 
 
 osm folder - osm files for Ile-de-France cities
