@@ -20,6 +20,10 @@
 - fixed data duplication bug
 - added normalzation of some features
 ### 11.12.2025:
+- experiments with clustering the paths and visualisation
+- reaserch about multi objective clustering
+- trying rearenging the clusters so that each agent has one path per cluster
+- trying weighted feature clustering for clearer clusters naming
 
 
 osm folder - osm files for Ile-de-France cities
