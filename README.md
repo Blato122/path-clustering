@@ -30,6 +30,8 @@
 - now generating a feature rank matrix to be later used for clustering
 - generated 20 paths per OD pair instead of only 3
 - increased JanuX path generation beta parameter for more path diversity and exploration
+- adjusting clustering experiments scripts to new features
+- reaserch about grouping
 
 
 osm folder - osm files for Ile-de-France cities
