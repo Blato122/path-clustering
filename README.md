@@ -24,6 +24,12 @@
 - reaserch about multi objective clustering
 - trying rearenging the clusters so that each agent has one path per cluster
 - trying weighted feature clustering for clearer clusters naming
+### 18.12.2025:
+- simplified and improved feature extraction by removing OSM features (not crucial for clustering)
+- improved turn counting and added left/right turn counts
+- now generating a feature rank matrix to be later used for clustering
+- generated 20 paths per OD pair instead of only 3
+- increased JanuX path generation beta parameter for more path diversity and exploration
 
 
 osm folder - osm files for Ile-de-France cities
