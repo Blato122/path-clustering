@@ -37,11 +37,11 @@ import numpy as np
         - <name>_ranking_matrix.csv
 """
 
-NUM_SAMPLES = 100       # Number of samples to generate per OD
-NUMBER_OF_PATHS = 20     # Number of paths to find for each origin-destination pair
-BETA = -1.5             # Beta parameter for the path generation: probability -> exp(beta * potential). Closer to 0 -> more random, more negative -> deterministic.
-MAX_ITERATIONS = 50    # Sampler safeguard
-SEED = 42               # For reproducibility
+NUM_SAMPLES = 100 # Number of samples to generate per OD
+NUMBER_OF_PATHS = 100 # Number of paths to find for each origin-destination pair
+BETA = -0.5 # Beta parameter for the path generation. Closer to 0 -> more random, more negative -> deterministic.
+MAX_ITERATIONS = 50 # Sampler safeguard
+SEED = 42 # For reproducibility
 
 # def get_osm_id_from_sumo(sumo_id):
 #     """
@@ -322,9 +322,12 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results
     start_time = time.time()
     network = jx.build_digraph(str(con_file), str(edg_file), str(rou_file))
 
+    # sample routes for each OD pair, not for each agent because multiple agents might have the same OD pair
+    unique_od_pairs = agents[["origin", "destination"]].drop_duplicates()
+
     # 300 origins and 300 destinations -> 90000 OD pairs -> too long to process!
     # instead, take agents.csv (order of hundreds)
-    for o_id, d_id in zip(agents["origin"], agents["destination"]):
+    for o_id, d_id in zip(unique_od_pairs["origin"], unique_od_pairs["destination"]):
         try:
             routes = jx.basic_generator(
                 network, 

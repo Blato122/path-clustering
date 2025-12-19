@@ -32,6 +32,9 @@
 - increased JanuX path generation beta parameter for more path diversity and exploration
 - adjusting clustering experiments scripts to new features
 - reaserch about grouping
+### 13.01.2025:
+- JanuX: running with higher beta (more diversity) and 100 generating paths per OD pair
+- JanuX: not allowing for cycles in generated paths
 
 
 osm folder - osm files for Ile-de-France cities
