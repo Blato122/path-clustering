@@ -4,7 +4,42 @@ import webbrowser
 
 df = pd.read_csv("../results/clustered_routes/beynes_routes_clustered.csv", quotechar='"')
 
-numeric_features = df.select_dtypes(include=['float64', 'int64']).drop(columns=['cluster'])
+# Cechy ciągłe do normalizacji
+continuous_features = [
+    'free_flow_time',
+    'total_length',
+    'mean_speed',
+    'speed_std',
+    'speed_range',
+    'lane_changes_per_km',
+    'priority_changes_per_km',
+    'yield_priority_changes_per_km',
+    'traffic_lights_per_km',
+    # 'bearing_std',
+    'turns_per_km',
+    'left_yield_turns_per_km',
+    # 'mean_circuity',
+    # 'edge_length_std',
+    # 'edges_per_km'
+]
+
+# Procentowe cechy w skali 0–1 (nie wymagają normalizacji)
+percentage_features = [
+    # 'pct_high_speed',
+    # 'pct_motorway',
+    # 'pct_trunk',
+    # 'pct_primary',
+    # 'pct_secondary',
+    # 'pct_tertiary',
+    # 'pct_unclassified',
+    # 'pct_residential'
+]
+
+# Wszystkie cechy używane w modelu
+features = continuous_features + percentage_features
+
+
+numeric_features = df[features]
 clusters = df['cluster']
 
 #GLOBAL
