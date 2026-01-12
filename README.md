@@ -35,6 +35,9 @@
 ### 13.01.2025:
 - JanuX: running with higher beta (more diversity) and 100 generating paths per OD pair
 - JanuX: not allowing for cycles in generated paths
+- cleand and complete script for clustering: clustering.py
+- representant for each cluster
+- clusters summary
 
 
 osm folder - osm files for Ile-de-France cities
