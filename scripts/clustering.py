@@ -303,7 +303,7 @@ def get_representants(city_name):
 
 def main():
     city_name = "saint_arnoult"
-    cluster(city_name,"kmeans")
+    cluster(city_name,"birch")
     clustering_coverage(city_name)
     cluster_means = clusters_summary(city_name)
     with open(get_clusters_summary_path(city_name), "a") as f:
