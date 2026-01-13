@@ -2,6 +2,9 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import Birch
+import hdbscan
 
 # ============================================================================
 # The script generates clustered_enriched_routes.cs, clustered_ranking_matrix.csv, representants_per_cluster.csv and clusters_summary.txt for a city specified in main().
@@ -122,7 +125,7 @@ def cluster(city_name, clustering_algorithm):
     
     Args:
         city_name
-        clustering_algorithm: either kmeans, ...
+        clustering_algorithm: kmeans, birch
     """
 
     df = pd.read_csv(get_ranking_matrix_path(city_name))
@@ -147,6 +150,42 @@ def cluster(city_name, clustering_algorithm):
         df.to_csv(get_clustered_ranking_matrix_path(city_name), index=False)
         enriched_df.to_csv(get_clustered_enriched_routes_path(city_name), index=False)
 
+
+    # elif(clustering_algorithm == "DBSCAN"):
+    #     dbscan = DBSCAN(eps=5, min_samples=100)
+    #     labels = dbscan.fit_predict(X)
+    #     df['cluster'] = labels
+    #     enriched_df['cluster'] = labels
+    #     with open(get_clusters_summary_path(city_name), "w") as f:
+    #         print("Clustering algorithm: DBSCAN", file=f)
+    #         print(df['cluster'].value_counts(), file=f)
+    #     print(df['cluster'].value_counts())
+    #     df.to_csv(get_clustered_ranking_matrix_path(city_name), index=False)
+    #     enriched_df.to_csv(get_clustered_enriched_routes_path(city_name), index=False)
+
+    elif(clustering_algorithm == "birch"):
+        birch = Birch(n_clusters=5, threshold=0.7)
+        labels = birch.fit_predict(X)
+        df['cluster'] = labels
+        enriched_df['cluster'] = labels
+        with open(get_clusters_summary_path(city_name), "w") as f:
+            print("Clustering algorithm: Birch", file=f)
+            print(df['cluster'].value_counts(), file=f)
+        print(df['cluster'].value_counts())
+        df.to_csv(get_clustered_ranking_matrix_path(city_name), index=False)
+        enriched_df.to_csv(get_clustered_enriched_routes_path(city_name), index=False)
+
+    # elif(clustering_algorithm == "hdbscan"):   # DENSITY - BASED CLUSTERING WON'T WORK FOR OUR DATA!
+    #     clusterer = hdbscan.HDBSCAN(min_cluster_size=50)
+    #     labels = clusterer.fit_predict(X)
+    #     df['cluster'] = labels
+    #     enriched_df['cluster'] = labels
+    #     with open(get_clusters_summary_path(city_name), "w") as f:
+    #         print("Clustering algorithm: HDBSCAN", file=f)
+    #         print(df['cluster'].value_counts(), file=f)
+    #     print(df['cluster'].value_counts())
+    #     df.to_csv(get_clustered_ranking_matrix_path(city_name), index=False)
+    #     enriched_df.to_csv(get_clustered_enriched_routes_path(city_name), index=False)
     else:
         print(f"There is no {clustering_algorithm} clustering algorithm.")
 
