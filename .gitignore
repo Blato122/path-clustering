@@ -4,5 +4,6 @@ scripts/__pycache__
 # .vscode
 osm
 
+# > 100 MB
 results/enriched_routes/othis_routes_enriched.csv
 results/ranking_matrices/othis_ranking_matrix.csv
