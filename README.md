@@ -38,7 +38,11 @@
 - cleand and complete script for clustering: clustering.py
 - representant for each cluster
 - clusters summary
-
+### 20.01.2025:
+- now generating sequences of H3 hexagons crossed for each path
+- removed mean_circuity NaNs
+- added visualization of generated paths (using JanuX)
+- added analysis of generated paths (counts per city)
 
 osm folder - osm files for Ile-de-France cities
 

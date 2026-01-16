@@ -7,6 +7,9 @@ import osmnx as ox
 import math
 import argparse
 import numpy as np
+import h3
+from pyproj import Transformer
+import swifter
 
 """
 1. Generate routes CSV for all networks found in a given directory.
@@ -42,6 +45,13 @@ NUMBER_OF_PATHS = 100 # Number of paths to find for each origin-destination pair
 BETA = -0.5 # Beta parameter for the path generation. Closer to 0 -> more random, more negative -> deterministic.
 MAX_ITERATIONS = 50 # Sampler safeguard
 SEED = 42 # For reproducibility
+
+# For Ile-de-France (UTM zone 31N)
+# <location netOffset="-476165.53,-5333265.02" convBoundary="0.00,0.00,9554.50,9484.10" origBoundary="2.679349,48.068781,2.812794,48.269237" projParameter="+proj=utm +zone=31 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"/>
+transformer = Transformer.from_crs("EPSG:32631", "EPSG:4326", always_xy=True)
+def utm_to_latlon(x, y):
+    lon, lat = transformer.transform(x, y)
+    return lat, lon
 
 # def get_osm_id_from_sumo(sumo_id):
 #     """
@@ -292,6 +302,42 @@ def calculate_circuity(df: pd.DataFrame, total_len: float) -> float | None:
 
     return total_len / straight_len
 
+def deduplicate_preserve_order(items: list) -> list:
+    seen = set()
+    result = []
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            result.append(item)
+    return result
+
+def get_h3_sequence_for_path(path_df: pd.DataFrame, resolution: int=10) -> list[str]:
+    """
+    Generate sequence of H3 hexagons crossed by a path.
+    
+    :param path_df: DataFrame with path edge data
+    :type path_df: pd.DataFrame
+    :param resolution: H3 resolution
+    :type resolution: int
+    :return: List of H3 cell IDs in traversal order
+    :rtype: list[Any]
+    """
+    
+    h3_hexagons = []
+
+    for row in path_df.itertuples():
+        # Need to convert UTM coords back to lat/lon, the exact projection is stored in SUMO files (e.g. .net.xml)
+        start_lat, start_lon = utm_to_latlon(row.start_x, row.start_y)
+        end_lat, end_lon = utm_to_latlon(row.end_x, row.end_y)
+
+        start_h3 = h3.latlng_to_cell(start_lat, start_lon, resolution)
+        end_h3 = h3.latlng_to_cell(end_lat, end_lon, resolution)
+
+        h3_hexagons.append(start_h3)
+        h3_hexagons.append(end_h3)
+
+    return deduplicate_preserve_order(h3_hexagons)
+
 def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results_dir: Path) -> None:
     """
     Generate paths for each OD pair in agents.csv using JanuX.
@@ -403,7 +449,7 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
             return [sumo_node_coords[u], sumo_node_coords[v]]
         return None # should not happen if data is consistent
     
-    df_sumo["shape"] = df_sumo.apply(fill_shape, axis=1)
+    df_sumo["shape"] = df_sumo.swifter.apply(fill_shape, axis=1)
     dropped = df_sumo["shape"].isna().sum()
     df_sumo = df_sumo.dropna(subset=["shape"])
     if dropped:
@@ -416,16 +462,16 @@ def generate_feature_file(name: str, net_dir: Path, osm_dir: Path, results_dir: 
         if pd.isna(x):
             return "unknown"
         return x.split(".")[-1] if isinstance(x, str) else x
-    df_sumo["type_clean"] = df_sumo["type"].apply(clean_hwy)
+    df_sumo["type_clean"] = df_sumo["type"].swifter.apply(clean_hwy)
     df_sumo["speed"] = df_sumo["speed"].astype(float) * 3.6  # maxspeed, originally in m/s
-    df_sumo["length"] = df_sumo["shape"].apply(compute_sumo_length)
-    df_sumo["bearing"] = df_sumo["shape"].apply(compute_sumo_bearing)
+    df_sumo["length"] = df_sumo["shape"].swifter.apply(compute_sumo_length)
+    df_sumo["bearing"] = df_sumo["shape"].swifter.apply(compute_sumo_bearing)
 
     # Extract start/end coordinates for circuity calculation later
     # Use these instead of OSM nodes because SUMO edges are splits of OSM ways
     def get_coords(shape):
         return shape[0][0], shape[0][1], shape[-1][0], shape[-1][1]
-    coords = df_sumo["shape"].apply(get_coords).apply(pd.Series).astype(float)
+    coords = df_sumo["shape"].swifter.apply(get_coords).apply(pd.Series).astype(float)
     df_sumo[["start_x", "start_y", "end_x", "end_y"]] = coords    
 
     df_sumo = df_sumo.drop(columns=["shape"]) # big and not used later -> drop
@@ -509,7 +555,7 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, enriched_
         feature_dict["total_length"] = total_len
         # Speed
         feature_dict["mean_speed"] = path_df["speed"].mean(skipna=True)
-        feature_dict["speed_std"] = path_df["speed"].std(skipna=True)
+        feature_dict["speed_std"] = path_df["speed"].std(skipna=True) if len(path_df) > 1 else 0.0
         feature_dict["speed_range"] = path_df["speed"].max(skipna=True) - path_df["speed"].min(skipna=True)
         feature_dict["pct_high_speed"] = safe_div(
             path_df.loc[path_df["speed"] > 50, "length"].sum(skipna=True),
@@ -542,7 +588,7 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, enriched_
         #     .sum(skipna=True), 
         #     total_len
         # )
-        # Lane/priotity changes, yieldings
+        # Lane/priority changes, yieldings
         feature_dict["lane_changes_per_km"] = safe_div(path_df["lanes"].diff().abs().sum(skipna=True), total_len_km)
         feature_dict["priority_changes_per_km"] = safe_div(path_df["priority"].diff().abs().sum(skipna=True), total_len_km) # number of priority changes or their total value? total value says more I think???
         feature_dict["yield_priority_changes_per_km"] = safe_div(path_df["priority"].diff().lt(0).sum(skipna=True), total_len_km)
@@ -551,17 +597,27 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, enriched_
         # feature_dict["bridges_per_km"] = safe_div(path_df["bridge"].notna().sum(skipna=True), total_len_km)
         # feature_dict["tunnels_per_km"] = safe_div(path_df["tunnel"].notna().sum(skipna=True), total_len_km)
         # Road geometry: shape, turns, ...
-        feature_dict["bearing_std"] = path_df["bearing"].std(skipna=True) # bearing variance (high = winding route, low = straight)
+        feature_dict["bearing_std"] = path_df["bearing"].std(skipna=True) if len(path_df) > 1 else 0.0 # bearing variance (high = winding route, low = straight)
         feature_dict["turns_per_km"] = safe_div(count_turns(path_df), total_len_km) # copy not needed, df isn't modified
         feature_dict["left_yield_turns_per_km"] = safe_div(count_yield_left_turns(path_df), total_len_km) # copy not needed, df isn't modified
         feature_dict["mean_circuity"] = calculate_circuity(path_df, total_len) # copy not needed, df isn't modified 
-        feature_dict["edge_length_std"] = path_df["length"].std(skipna=True) # Urban centers tend to have many short edges (blocks). Highways have long, consistent edges. High variance might indicate a route that transitions between highway and city.
+        feature_dict["edge_length_std"] = path_df["length"].std(skipna=True) if len(path_df) > 1 else 0.0 # Urban centers tend to have many short edges (blocks). Highways have long, consistent edges. High variance might indicate a route that transitions between highway and city.
         feature_dict["edges_per_km"] = safe_div(len(edges), total_len_km)
+
+        # Don't include while clustering!
+        feature_dict["h3_sequence"] = ",".join(get_h3_sequence_for_path(path_df))
 
         return feature_dict
 
     # Enrich and save
-    enriched = pd.concat([routes, routes["path"].apply(compute_features_for_path).apply(pd.Series)], axis=1)
+    enriched = pd.concat([routes, routes["path"].swifter.apply(compute_features_for_path).apply(pd.Series)], axis=1)
+    
+    # Fill NaNs with defaults
+    fill_values = {
+        'mean_circuity': 1.0, # ? why is that NaN sometimes
+    }
+    enriched = enriched.fillna(fill_values)
+
     out_path = enriched_routes_dir/ f"{name}_routes_enriched.csv"
     enriched.to_csv(out_path, index=False)
     print(f"Saved to {out_path}")
@@ -585,7 +641,7 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, enriched_
     ]
 
     od_pairs = enriched.groupby(["origins", "destinations"], sort=False)
-    feature_cols = [col for col in enriched.columns if col not in ["origins", "destinations", "path"]]
+    feature_cols = [col for col in enriched.columns if col not in ["origins", "destinations", "path", "h3_sequence"]]
 
     ranking_matrix_agents = []
     for agent_id, ((origin, destination), group) in enumerate(od_pairs):        

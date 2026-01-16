@@ -3,6 +3,6 @@ scripts/__pycache__
 # .venv
 # .vscode
 osm
-scripts/other.py
-scripts/test.py
-scripts/check_coverage.py
+
+results/enriched_routes/othis_routes_enriched.csv
+results/ranking_matrices/othis_ranking_matrix.csv
