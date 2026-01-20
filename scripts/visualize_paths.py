@@ -6,6 +6,7 @@ from pathlib import Path
 import janux as jx
 
 city_name = "bussy_saint_georges"
+# city_name = "nangis" # TEST
 
 # Get this script's dir and go up one level to path-clustering root
 script_dir = Path(__file__).parent
@@ -34,9 +35,10 @@ print(f"Selected OD pair: {origin} -> {destination}")
 od_routes = routes[(routes['origins'] == origin) & (routes['destinations'] == destination)]
 print(f"Total paths for this OD pair: {len(od_routes)}")
 
-# Select up to 5 random paths
+# Select up to n random paths
 n_paths = min(5, len(od_routes))
-random_paths = od_routes.sample(n=n_paths)#, random_state=42) # remove random_state for randomness
+random_paths = od_routes.sample(n=n_paths, random_state=42) # remove random_state for randomness
+print(random_paths)
 
 # Convert to list of edge lists
 routes_to_visualize = []

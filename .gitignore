@@ -7,3 +7,9 @@ osm
 # > 100 MB
 results/enriched_routes/othis_routes_enriched.csv
 results/ranking_matrices/othis_ranking_matrix.csv
+
+# only one OD pair for testing
+results/enriched_routes/nangis_routes_enriched.csv
+results/merged_edges/nangis_merged_edges.csv
+results/ranking_matrices/nangis_ranking_matrix.csv
+results/routes/nangis_routes.csv

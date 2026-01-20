@@ -43,6 +43,7 @@
 - removed mean_circuity NaNs
 - added visualization of generated paths (using JanuX)
 - added analysis of generated paths (counts per city)
+### 27.01.2025:
 
 osm folder - osm files for Ile-de-France cities
 
