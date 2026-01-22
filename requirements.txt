@@ -1,13 +1,35 @@
-pandas>=2.0
-numpy>=1.24
-scikit-learn>=1.3
-hdbscan>=0.8.33
-h3>=4.0
-pyproj>=3.4
-osmnx>=1.9
-geopy>=2.4
-lxml>=4.9
-matplotlib>=3.7
-seaborn>=0.13
-swifter>=1.4
-requests>=2.28
+pandas==2.3.3
+numpy==2.4.1
+networkx==3.6
+osmnx==2.0.6
+lxml==6.0.2
+pyproj==3.7.2
+h3==4.4.1
+swifter==1.4.0
+matplotlib==3.10.7
+seaborn==0.13.2
+scikit-learn==1.7.2
+hdbscan==0.8.41
+requests==2.32.5
+geopy==2.4.1
+shapely==2.1.2
+pyogrio==0.11.1
+geopandas==1.1.1
+joblib==1.5.2
+tqdm==4.67.1
+
+janux @ git+https://github.com/Blato122/JanuX.git@feat/path-clustering
+# Installs a released (non-editable) copy from the 'feat/path-clustering' Git branch into the venv
+# To pick up new commits you must re-run: 
+# pip install --upgrade --force-reinstall 'git+https://...@branch#egg=janux'
+# To develop JanuX locally: 
+# pip install -e ../JanuX (assuming it's path-clustering's sibling)
+
+# === === === === === === ===
+
+# janux @ git+https://github.com/Blato122/JanuX.git@feat/path-clustering#egg=janux
+
+# janux @ file://../JanuX
+# place JanuX fork in the same directory as path-clustering (siblings)
+# e.g. /COeXISTENCE/path-clustering and /COeXISTENCE/JanuX
+
