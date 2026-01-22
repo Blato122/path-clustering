@@ -44,6 +44,7 @@
 - added visualization of generated paths (using JanuX)
 - added analysis of generated paths (counts per city)
 ### 27.01.2025:
+- fixed JanuX cycle/U-turn bug
 
 osm folder - osm files for Ile-de-France cities
 

@@ -40,12 +40,6 @@ import swifter
         - <name>_ranking_matrix.csv
 """
 
-NUM_SAMPLES = 100 # Number of samples to generate per OD
-NUMBER_OF_PATHS = 100 # Number of paths to find for each origin-destination pair
-BETA = -0.5 # Beta parameter for the path generation. Closer to 0 -> more random, more negative -> deterministic.
-MAX_ITERATIONS = 50 # Sampler safeguard
-SEED = 42 # For reproducibility
-
 # For Ile-de-France (UTM zone 31N)
 # <location netOffset="-476165.53,-5333265.02" convBoundary="0.00,0.00,9554.50,9484.10" origBoundary="2.679349,48.068781,2.812794,48.269237" projParameter="+proj=utm +zone=31 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"/>
 transformer = Transformer.from_crs("EPSG:32631", "EPSG:4326", always_xy=True)
@@ -375,11 +369,10 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, results
     # instead, take agents.csv (order of hundreds)
     for o_id, d_id in zip(unique_od_pairs["origin"], unique_od_pairs["destination"]):
         try:
-            routes = jx.basic_generator(
+            routes = jx.extended_generator(
                 network, 
                 [origins[o_id]], 
                 [destinations[d_id]],
-                max_iterations=MAX_ITERATIONS,
                 as_df=True,
                 calc_free_flow=True,
                 **path_gen_kwargs
@@ -721,11 +714,21 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
     
     path_gen_kwargs = {
-        "random_seed": SEED,
-        "num_samples": NUM_SAMPLES,
-        "number_of_paths": NUMBER_OF_PATHS,
-        "beta": BETA,
-        "verbose": True, # Print the progress of the path generation
+        "verbose" : True,
+        "number_of_paths" : 100,
+        "beta" : -0.50,
+        "weight" : "time",
+        "num_samples" : 100,
+        "max_path_length" : 1000,
+        "allow_loops" : False,
+
+        "adaptive" : True,
+        "tolerate_num_iterations" : 20,
+        "shift_parameters_by" : 5,
+        "params_to_shift" : "both",
+
+        "random_seed": 42,
+        "max_resample_iterations": 50
     }
 
     stages = [

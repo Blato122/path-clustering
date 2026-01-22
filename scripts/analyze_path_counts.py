@@ -41,11 +41,9 @@ summary.columns = ['Mean paths', 'Std paths', 'Min paths', 'Max paths', 'Total a
 fig, ax = plt.subplots(1, 1, figsize=(12, 10))
 
 sns.boxplot(data=df, y='city', x='paths_per_agent', ax=ax)
-ax.axvline(100, color='red', linestyle='--', linewidth=2, label='Target: 100 paths')
 ax.set_xlabel('Number of paths per agent')
 ax.set_ylabel('City')
 ax.set_title('Path count distribution by city')
-ax.legend()
 ax.grid(True, alpha=0.3, axis='x')
 
 plt.tight_layout()

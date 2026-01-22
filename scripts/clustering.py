@@ -302,7 +302,9 @@ def get_representants(city_name):
 # ============================================================================
 
 def main():
-    city_name = "saint_arnoult"
+    city_name = "bussy_saint_georges"
+    # city_name = "saint_arnoult"
+    # city_name = "othis"
     cluster(city_name,"birch")
     clustering_coverage(city_name)
     cluster_means = clusters_summary(city_name)
