@@ -715,10 +715,10 @@ def main():
     
     path_gen_kwargs = {
         "verbose" : True,
-        "number_of_paths" : 100,
-        "beta" : -0.50,
+        "number_of_paths" : 50,
+        "beta" : -0.10,
         "weight" : "time",
-        "num_samples" : 100,
+        "num_samples" : 300,
         "max_path_length" : 1000,
         "allow_loops" : False,
 
