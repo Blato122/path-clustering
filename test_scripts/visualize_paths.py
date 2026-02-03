@@ -20,18 +20,18 @@ viz_dir.mkdir(parents=True, exist_ok=True)
 route_files = list(routes_dir.rglob("*_routes_*.csv"))
 groups = {}
 for f in route_files:
-    if f.parent != routes_dir:
-        city = f.parent.name
-    else:
-        stem = f.stem
-        city = stem.split("_routes_")[0] if "_routes_" in stem else stem.split("_routes")[0]
-    groups.setdefault(city, []).append(f)
+    rel = f.relative_to(routes_dir)
+    parts = rel.parts
+    # assume structure: test_results/<city>/<N>_paths/<files>
+    city = parts[0]
+    n_paths_folder = parts[1]  # assume present
+    groups.setdefault((city, n_paths_folder), []).append(f)
 
 if not groups:
     print("No route files found in", routes_dir)
     raise SystemExit(0)
 
-for city, files in groups.items():
+for (city, n_paths_folder), files in groups.items():
     print(f"Network: {city}")
     dfs = {}
     for f in files:
@@ -73,7 +73,8 @@ for city, files in groups.items():
         nod_file = data_dir / city / f"{city}.con.xml"
     edg_file = data_dir / city / f"{city}.edg.xml"
 
-    city_dir = viz_dir / city
+    # place visualizations under viz_dir/<city>/<N>_paths/ if that folder exists in test_results
+    city_dir = viz_dir / city / n_paths_folder
     city_dir.mkdir(parents=True, exist_ok=True)
 
     if not nod_file.exists() or not edg_file.exists():
@@ -87,8 +88,8 @@ for city, files in groups.items():
             print(f"  Generator {gen_name}: no routes for selected OD; skipping this generator.")
             continue
 
-        # 10
-        n_paths = min(10, len(od_routes))
+        # 100 -> all
+        n_paths = min(100, len(od_routes))
         sample = od_routes.sample(n=n_paths) if len(od_routes) > n_paths else od_routes
 
         routes_to_visualize = []
@@ -141,10 +142,13 @@ for city, files in groups.items():
             gen, beta = gen_name, ""
         parsed.append((gen, beta, p))
     
-    gens = sorted({g for g, b, p in parsed})
+    preferred_order = ["extended", "extended_uturn", "extended2", "extended2_lookahead"]
+    all_gens = {g for g, b, p in parsed}
+    present_preferred = [g for g in preferred_order if g in all_gens]
+    other_gens = sorted(list(all_gens - set(present_preferred)))
+    gens = present_preferred + other_gens
+
     betas = sorted({b for g, b, p in parsed}, key=lambda x: float(x) if x else 0.0)
-    if not betas:
-        betas = [""]
     
     # build mapping beta -> gen -> path
     grid = {b: {g: None for g in gens} for b in betas}

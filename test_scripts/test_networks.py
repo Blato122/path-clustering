@@ -56,29 +56,6 @@ repo_root = this_file.parents[1]
 test_results_dir = repo_root / "test_results"
 test_data_dir = repo_root / "test_data"
 
-def jaccard_similarity(path_a, path_b):
-    sa, sb = set(path_a), set(path_b)
-    if not sa and not sb:
-        return 1.0
-    # size of intersection / size of union
-    return len(sa & sb) / len (sa | sb)
-
-def summarize(routes):
-    print(f"Total selected routes: {len(routes.index)}")
-    unique_routes = routes['path'].unique()
-    print(f"Unique routes: {len(unique_routes)}")
-    lengths = [len(p.split(",")) for p in routes['path'].unique()]
-    print(f"Route lengths (min/mean/max): {min(lengths)}/{np.mean(lengths):.2f}/{max(lengths)}")
-    
-    route_edges = [r.split(",") for r in unique_routes]
-    total_j = 0.0
-    pairs = 0
-    # Produces unordered pairs without replacement (no aa or bb; ab=ba)
-    for a, b in combinations(route_edges, 2):
-        total_j += jaccard_similarity(a, b)
-        pairs += 1
-    print(f"Mean pairwise Jaccard overlap: {total_j/pairs:.3f}")
-
 if __name__ == "__main__":
     path_gen_kwargs = {
         "verbose": True,
@@ -147,10 +124,10 @@ if __name__ == "__main__":
 
                 # Save the routes to a CSV file    
                 if all_routes:
-                    # summarize(all_routes)
                     all_routes_merged = pd.concat(all_routes)
                     
-                    csv_save_dir = test_results_dir / name
+                    n_paths_folder = f"{path_gen_kwargs.get('number_of_paths', 'unknown')}_paths"
+                    csv_save_dir = test_results_dir / name / n_paths_folder
                     csv_save_dir.mkdir(parents=True, exist_ok=True)
 
                     csv_save_path = csv_save_dir / f"{name}_routes_{gen}_{round(beta, 3)}.csv"

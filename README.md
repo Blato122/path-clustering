@@ -32,19 +32,21 @@
 - increased JanuX path generation beta parameter for more path diversity and exploration
 - adjusting clustering experiments scripts to new features
 - reaserch about grouping
-### 13.01.2025:
+### 13.01.2026:
 - JanuX: running with higher beta (more diversity) and 100 generating paths per OD pair
 - JanuX: not allowing for cycles in generated paths
-- cleand and complete script for clustering: clustering.py
+- cleaned and completed script for clustering: clustering.py
 - representant for each cluster
 - clusters summary
-### 20.01.2025:
+### 20.01.2026:
 - now generating sequences of H3 hexagons crossed for each path
 - removed mean_circuity NaNs
 - added visualization of generated paths (using JanuX)
 - added analysis of generated paths (counts per city)
-### 27.01.2025:
-- fixed JanuX cycle/U-turn bug
+### 27.01.2026:
+- working on JanuX cycle/U-turn bug
+### 3.02.2026
+- JanuX path visualizations and tests (different networks, parameters)
 
 osm folder - osm files for Ile-de-France cities
 
