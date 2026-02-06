@@ -50,18 +50,18 @@
 ### 10.02.2026
 - continuing work on JanuX path generation quality
 - tried so far:
- - Yen's k shortest paths - too little variety
- - node potential constraint - too little variety
- - node potential constrain + one-step lookahead - still quite little variety, "hacky" workaround
- - plain extended - cycles, U-turns, chaos in general (when generating many paths)
+  - Yen's k shortest paths - too little variety
+  - node potential constraint - too little variety
+  - node potential constrain + one-step lookahead - still quite little variety, "hacky" workaround
+  - plain extended - cycles, U-turns, chaos in general (when generating many paths)
 - JanuX info:
- - sometimes reverse edges have completely different IDs, adding a minus is not always enough
- - visualization - striped lines are one-way, although some edges look striped despite actually being two-way because they consist of two overlapping one-way edges
+  - sometimes reverse edges have completely different IDs, adding a minus is not always enough
+  - visualization - striped lines are one-way, although some edges look striped despite actually being two-way because they consist of two overlapping one-way edges
 - problems:
- - no info about the junctions - loops might happen (junction reuse), even if they don't reuse any edges
- - no matter the algorithm, if U-turns and loops are forbidden, for some ODs it will be impossible to generate more than one path
- - sometimes 10/10 routes are generated and there's total chaos, sometimes there are only 3/10 and some obvious ones are skipped
- - in some small networks, generating 10 routes is too much - even if they're all "legal", only a few make sense, the rest is just circling around
+  - no info about the junctions - loops might happen (junction reuse), even if they don't reuse any edges
+  - no matter the algorithm, if U-turns and loops are forbidden, for some ODs it will be impossible to generate more than one path
+  - sometimes 10/10 routes are generated and there's total chaos, sometimes there are only 3/10 and some obvious ones are skipped
+  - in some small networks, generating 10 routes is too much - even if they're all "legal", only a few make sense, the rest is just circling around
 
 osm folder - osm files for Ile-de-France cities
 
