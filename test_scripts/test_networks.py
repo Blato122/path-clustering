@@ -60,14 +60,14 @@ if __name__ == "__main__":
     path_gen_kwargs = {
         "verbose": True,
         "number_of_paths": 10,
-        "beta": -0.10,
+        "beta": -0.10, # overwritten later anyway
         "weight": "time",
-        "num_samples": 300,
+        "num_samples": 500,
         "max_path_length": None,
         "allow_loops": False,
 
         "adaptive": True,
-        "tolerate_num_iterations": 20,
+        "tolerate_num_iterations": 100,
         "shift_parameters_by": 5,
         "params_to_shift": "both",
 
@@ -81,9 +81,9 @@ if __name__ == "__main__":
         exit(1)
     ods = jx.utils.read_json(ods_file)
 
-    test_networks = ["grid", "csomor", "ingolstadt"] # simple, medium, large
-    generators = ["extended", "extended_uturn", "extended2", "extended2_lookahead"]
-    betas = (-np.logspace(np.log10(0.1), np.log10(3), num=5)).tolist() # negative
+    test_networks = ["grid", "csomor", "ingolstadt"] #, "bussy_saint_georges"] # simple, medium, large, IdF
+    generators = ["extended", "extended3"] # , "extended2", "extended2_lookahead"]
+    betas = (-np.logspace(np.log10(0.1), np.log10(2), num=5)).tolist() # negative
 
     for beta in betas:
         path_gen_kwargs['beta'] = beta

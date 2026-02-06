@@ -715,21 +715,24 @@ def main():
     
     path_gen_kwargs = {
         "verbose" : True,
-        "number_of_paths" : 50,
-        "beta" : -0.10,
+        "number_of_paths" : 10,
+        "beta" : -0.25,
         "weight" : "time",
-        "num_samples" : 300,
+        "num_samples" : 1000,
         "max_path_length" : 1000,
         "allow_loops" : False,
 
         "adaptive" : True,
-        "tolerate_num_iterations" : 20,
+        "tolerate_num_iterations" : 200,
         "shift_parameters_by" : 5,
         "params_to_shift" : "both",
 
         "random_seed": 42,
         "max_resample_iterations": 50
     }
+
+    # NEW:
+    path_gen_kwargs['version'] = "extended3"
 
     stages = [
         name for name, enabled in [
