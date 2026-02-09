@@ -141,6 +141,15 @@ def main():
         k = min(args.num_ods, len(candidates))
         sampled_ods = rng.sample(candidates, k=k)
 
+        ################################
+        if city == "saint_arnoult":
+            sampled_ods = [
+                ("-101609498#5", "282689983#1"),
+                ("336863934", "100475365#1"),
+                ("-282689981#0", "-352797377"),
+            ]
+        ################################
+
         # Output folders
         city_out = viz_root / city
         city_out.mkdir(parents=True, exist_ok=True)
