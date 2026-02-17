@@ -70,6 +70,32 @@
   - sometimes "useless" detours are still present - but after all, to the algorithm, they're perfectly valid routes
   - origin collapse is helpful in some cases but it also leads to route duplication (two identical routes varying only in the origin edge direction)
   - very high beta (such as -0.1) might actually cause less routes to be generated? Try generating for IdF cities with -0.5 or less.
+### 17.02.2026:
+- JanuX path generation finishing touches (hopefully)
+  - added "diverse_selection" of routes - instead of sampling by probabilities based on frequencies, choose routes by starting with the most popular one and then adding the most different from the already chosen set. Stop when there are enough routes or the remaining routes are too similar
+  - optional max length w.r.t. the shortest path filtering
+  - handles origin collapse duplicates
+- resume work on clustering, main points:
+  - per-OD ranking matrices
+  - per-city clustering
+  - drop the closest representative logic (NEW)
+  - introduce action masking for RL instead (NEW)
+  - add extensive evaluation of different algorithms with different settings and optional PCA (NEW)
+  - new performance metrics and feature analysis (to e.g. remove all 0 features) (NEW)
+- findings:
+  - KMeans performs best. And generally, the fewer clusters the better the scores. But this was expected - with just 2 clusters it boils down to sth like "fast vs slow" clusters. And we need some variety in the action space. I think k=5 still makes sense.
+  - PCA doesn't help. It either ties or slightly loses in silhouette score. It reduces 23 features into 14-15 components.
+  - For k=5, action coverage is quite decent. Beynes: 3.92; Saint Arnoult: 4.57; Provins: 4.48.
+  - pct_motorway and pct_trunk are all 0 in these cities!
+  - total_length, mean_circuity and free_flow_time have high VIF
+  - some features are highly correlated but they change from city to city
+- next step:
+  - modify RouteRL/URB to handle action masking
+  - run URB experiment with new, clustered actions
+- consider:
+  - JanuX: don't stop at N paths, generate as many as possible until the new ones are too similar?
+
+
 
 osm folder - osm files for Ile-de-France cities
 

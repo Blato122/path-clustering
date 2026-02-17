@@ -13,6 +13,7 @@ repo_root = script_dir.parent
 # Paths relative to repo root
 routes_dir = repo_root / "results" / "routes"
 misc_dir = repo_root / "results" / "misc"
+misc_dir.mkdir(parents=True, exist_ok=True)
 
 route_files = list(routes_dir.glob("*_routes.csv"))
 

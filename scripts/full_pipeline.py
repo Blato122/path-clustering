@@ -710,19 +710,19 @@ def main():
     enriched_routes_dir = results_dir / "enriched_routes"
     ranking_matrix_dir = results_dir / "ranking_matrices"
 
-    for d in [results_dir, routes_dir, merged_edges_dir, enriched_routes_dir]:
+    for d in [results_dir, routes_dir, merged_edges_dir, enriched_routes_dir, ranking_matrix_dir]:
         d.mkdir(parents=True, exist_ok=True)
     
     path_gen_kwargs = {
         "verbose" : True,
         "number_of_paths" : 10,
-        "beta" : -0.25,
+        "beta" : -0.5,
         "weight" : "time",
-        "num_samples" : 1000,
+        "num_samples" : 10000,
         "max_path_length" : 1000,
         "allow_loops" : False,
 
-        "adaptive" : True,
+        "adaptive" : False,
         "tolerate_num_iterations" : 200,
         "shift_parameters_by" : 5,
         "params_to_shift" : "both",
@@ -733,6 +733,7 @@ def main():
 
     # NEW:
     path_gen_kwargs['version'] = "extended3"
+    path_gen_kwargs['diverse_selection'] = True
 
     stages = [
         name for name, enabled in [

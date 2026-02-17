@@ -1,0 +1,7 @@
+cluster
+0    481
+3    431
+1    388
+2    388
+4    370
+Name: count, dtype: int64
