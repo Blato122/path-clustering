@@ -31,7 +31,6 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 # This script operates on the premise that in all files: 
 #   enriched_routes, ranking_matrix, clustered_enriched_routes and clustered_ranking_matrix
 #   under the same index we have the same path. 
-# Also it requires one (origin, destination) pair per agent and agent_id in ranking_matrix.
 # ============================================================================
 
 """
@@ -40,8 +39,8 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 Per-OD - calculate the rank of a path only relative to other paths for that specific OD.
 Every single OD pair has a #1 fastest path and a #1 shortest path etc. Whether a path is 2km 
 or 20km, there is always a "shortest" (0th percentile) and "longest" (100th percentile). It also
-serves as a normalization step. But we lose the "absolute truth". We won't if the "shortest" 
-route is actually 50km long. Also, the RL agent ultimately, I think, cares about the trade-off
+serves as a normalization step. But we lose the "absolute truth". We won't know if the "shortest" 
+route is actually 50km long. But the RL agent ultimately, I think, cares about the trade-off
 between choosing action A over action B, not their absolute features. When there are 3 routes
 with travel times of 50, 60 and 70 minutes, we care that the first one is the fastest relative
 to the rest; not that it's slower than some other routes for different ODs.
@@ -75,7 +74,7 @@ I'm afraid that forcing that each path for a given OD be assigned to a different
 confuse the agent and lead to poor performance and inoptimal policy. Let's say there are 5 clusters
 and an agent has 5 paths, 1 of which matches cluster 1 and the rest matches cluster 2. This approach 
 would mean that we force three of these paths to match clusters 3, 4 and 5 even if they completely
-don't match them. This might cause agent to think that it's trying action 5 (which should be a route
+don't match them. This might cause the agent to think that it's trying action 5 (which should be a route
 from cluster 5) while in reality it gets the same result as action 2 - a path from cluster 2.
 
 --> My suggestion - drop the closest representative logic.
@@ -89,7 +88,7 @@ to choosing a path from that cluster gets masked (disabled) for that agent.
 This could also neatly handle cases in which there are insufficient paths for a given OD - e.g. just 1. This
 will, unfortunately, inevitably happen no matter how good the path generation algorithm because sometimes the
 network simply has only one connection between two points, especially with all the constraints (no edge revisit,
-no junction revisit, no U-turns). In such cases, RL agent would see action K as true and the rest as false - e.g.
+no junction revisit, no U-turns). In such cases, an RL agent would see action K as true and the rest as false - e.g.
 [0, 0, 1, 0, 0]. It would see it as a "trivial state" with no alternatives rather than something confusing.
 
 Requires RouteRL modification.
@@ -245,7 +244,7 @@ def get_masked_representants(city_name):
     # Load clustered data
     df_ranked = pd.read_csv(get_clustered_ranking_matrix_path(city_name))
     df_enriched = pd.read_csv(get_clustered_enriched_routes_path(city_name))
-    features = choose_features()
+    features = _get_active_features(df_ranked)
 
     # Get cluster centroids
     centroids = df_ranked.groupby("cluster")[features].mean()
@@ -255,11 +254,11 @@ def get_masked_representants(city_name):
     masks = []
 
     # For each agent, find the best path per cluster
-    for agent_id, agent_group in df_ranked.groupby("agent_id"):
+    for (origin, destination), group in df_ranked.groupby(["origins", "destinations"]):
         agent_mask = [0] * num_clusters
 
         for cluster_id in range(num_clusters):
-            paths_in_cluster = agent_group[agent_group["cluster"] == cluster_id]
+            paths_in_cluster = group[group["cluster"] == cluster_id]
 
             if not paths_in_cluster.empty:
                 agent_paths_np = paths_in_cluster[features].to_numpy()
@@ -269,20 +268,20 @@ def get_masked_representants(city_name):
                 global_idx = paths_in_cluster.index[local_idx]
                 
                 representant = df_enriched.iloc[[global_idx]].copy()
-                representant["agent_id"] = agent_id
                 representant["cluster_id"] = cluster_id
                 representants.append(representant)
 
                 agent_mask[cluster_id] = 1
 
-        masks.append([agent_id] + agent_mask)
+        masks.append([origin, destination] + agent_mask)
 
     all_representants = pd.concat(representants, ignore_index=True)
     all_representants.to_csv(get_representants_path(city_name), index=False)
 
-    mask_df = pd.DataFrame(masks, columns=['agent_id'] + [f'mask_{i}' for i in range(num_clusters)])
+    mask_df = pd.DataFrame(masks, columns=['origins', 'destinations'] + [f'mask_{i}' for i in range(num_clusters)])
     mask_df.to_csv(f"../results/clustered_routes/{city_name}_action_masks.csv", index=False)
-    print(f"Masking complete. Average actions per agent: {mask_df.iloc[:, 1:].sum(axis=1).mean():.2f}")
+    mask_cols = [f'mask_{i}' for i in range(num_clusters)]
+    print(f"Masking complete. Average actions per agent: {mask_df[mask_cols].sum(axis=1).mean():.2f}")
 
 def main(city_name):
     labels, _, _ = cluster(city_name, "kmeans", 5, False)
@@ -317,7 +316,7 @@ def evaluate(city_name):
 
                 df_ranked = pd.read_csv(get_ranking_matrix_path(city_name))
                 df_ranked['cluster'] = labels
-                action_coverage = df_ranked.groupby('agent_id')['cluster'].nunique().mean()
+                action_coverage = df_ranked.groupby(["origins", "destinations"])['cluster'].nunique().mean()
 
                 results.append({
                     "use_pca": use_pca, "alg": alg, "k": n_clusters,
@@ -411,7 +410,7 @@ def diagnose_features(city_name):
     print(diag_df.to_string(index=False))
 
 if __name__ == "__main__":
-    for city_name in ["saint_arnoult"]:#, "beynes", "provins"]:
+    for city_name in ["saint_arnoult", "beynes", "provins"]:
         plot_correlation_matrix(city_name)
         diagnose_features(city_name)
         check_vif(city_name)

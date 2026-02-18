@@ -1,0 +1,7 @@
+cluster
+0    1133
+3    1066
+1    1032
+2     982
+4     791
+Name: count, dtype: int64

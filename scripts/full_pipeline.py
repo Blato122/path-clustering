@@ -637,9 +637,8 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, enriched_
     feature_cols = [col for col in enriched.columns if col not in ["origins", "destinations", "path", "h3_sequence"]]
 
     ranking_matrix_agents = []
-    for agent_id, ((origin, destination), group) in enumerate(od_pairs):        
+    for (origin, destination), group in od_pairs:        
         agent_matrix = group.copy()
-        agent_matrix["agent_id"] = agent_id
         for col in feature_cols:
             agent_matrix[col] = agent_matrix[col].rank(pct=True)
 
@@ -650,7 +649,7 @@ def enrich_routes(name: str, routes_dir: Path, merged_edges_dir: Path, enriched_
 
     ranking_matrix = pd.concat(ranking_matrix_agents, ignore_index=True)
     # Reorder columns to put group_id, origins, destinations at the front, remove path
-    cols = ["agent_id", "origins", "destinations"] + [c for c in ranking_matrix.columns if c not in ["agent_id", "origins", "destinations", "path"]]
+    cols = ["origins", "destinations"] + [c for c in ranking_matrix.columns if c not in ["origins", "destinations", "path"]]
     ranking_matrix = ranking_matrix[cols]
 
     out_path = ranking_matrix_dir / f"{name}_ranking_matrix.csv"
