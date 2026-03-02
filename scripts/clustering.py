@@ -10,7 +10,7 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import Birch
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import DBSCAN
-import hdbscan
+# import hdbscan
 # GMM?
 
 from sklearn.preprocessing import StandardScaler
@@ -409,12 +409,20 @@ def diagnose_features(city_name):
     print("\n--- Feature Diagnostics ---")
     print(diag_df.to_string(index=False))
 
+def describe_clusters(city_name):
+    df = pd.read_csv(get_clustered_enriched_routes_path(city_name))
+    features = _get_active_features(df)
+
+    centroids = df.groupby("cluster")[features].mean() # why no id?
+    return centroids
+
 if __name__ == "__main__":
     for city_name in ["saint_arnoult", "beynes", "provins"]:
         plot_correlation_matrix(city_name)
-        diagnose_features(city_name)
-        check_vif(city_name)
-        results = evaluate(city_name)
-        print(results)
+        # diagnose_features(city_name)
+        # check_vif(city_name)
+        # results = evaluate(city_name)
+        # print(results)
+        print(describe_clusters(city_name))
 
-        main(city_name)
+        # main(city_name)

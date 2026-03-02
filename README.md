@@ -94,6 +94,21 @@
   - run URB experiment with new, clustered actions
 - consider:
   - JanuX: don't stop at N paths, generate as many as possible until the new ones are too similar?
+### 24.02.2026:
+- working on URB-clustering integration:
+  - several URB and RouteRL-URB changes made (connected to action masking), described in clustering-readme.md in URB
+- JanuX still has a problem - for one OD in saint_arnoult (and possibly more in other cities), there are 0 routes generated using the most restrictive version - trying to figure out why that is:
+  - we need to ban U-turns and edge revisits
+  - however, in some cases, network topology might require them to find any routes
+  - after all, we operate on edges and transitions between then (former as nodes, latter being edges)
+  - I think it might be that a->dest is not possible and a->b->c->dest is; b->c forming a U-turn
+  - this is rare (1 out of >200 ODs in Saint Arnoult) but can happen. Predecessors of the destination edge for that failed OD didn't contain "a" edge (a from the previous point)
+- added cluster description (centroids) to know more or less what each cluster means
+- ran IPPO URB experiment
+- TODO:
+  - organize dirs with clustering results better
+  - make action mask passing flow better
+### 3.02.2026:
 
 
 
