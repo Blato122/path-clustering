@@ -417,12 +417,12 @@ def describe_clusters(city_name):
     return centroids
 
 if __name__ == "__main__":
-    for city_name in ["saint_arnoult", "beynes", "provins"]:
+    for city_name in ["saint_arnoult"]:#, "beynes", "provins"]:
         plot_correlation_matrix(city_name)
-        # diagnose_features(city_name)
-        # check_vif(city_name)
-        # results = evaluate(city_name)
-        # print(results)
+        diagnose_features(city_name)
+        check_vif(city_name)
+        results = evaluate(city_name)
+        print(results)
         print(describe_clusters(city_name))
 
         # main(city_name)

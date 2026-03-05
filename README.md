@@ -104,12 +104,22 @@
   - I think it might be that a->dest is not possible and a->b->c->dest is; b->c forming a U-turn
   - this is rare (1 out of >200 ODs in Saint Arnoult) but can happen. Predecessors of the destination edge for that failed OD didn't contain "a" edge (a from the previous point)
 - added cluster description (centroids) to know more or less what each cluster means
-- ran IPPO URB experiment
+- ran IPPO URB Saint Arnoult experiment
 - TODO:
   - organize dirs with clustering results better
   - make action mask passing flow better
 ### 3.02.2026:
+- interpreted IPPO URB Saint Arnoult experiments:
+  - increased travel times for both humans and AVs (both before and after the mutation)
+  - possible reason? - clustered routes are not necessarily the best ones, they just represent
+  different route types. Some of them might be really bad and still be an option because they're
+  just distinct. Before, we only used the best routes (most sampled by Janux).
+- TODO:
+  - run on different networks as well
+  - compare new and old JanuX paths side by side once again
+  - focus on fixing the first phase first (2nd and 3rd - one episode)
 
+  - make sure clusters.json JanuX parameters are not used!
 
 
 osm folder - osm files for Ile-de-France cities
