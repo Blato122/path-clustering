@@ -1,7 +1,0 @@
-cluster
-3    416
-2    399
-0    354
-4    336
-1    309
-Name: count, dtype: int64

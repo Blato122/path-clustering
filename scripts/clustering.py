@@ -1,17 +1,18 @@
+from pathlib import Path
+import json
+
 import pandas as pd
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
+import argparse
 
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import KMeans
 from sklearn.cluster import Birch
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.cluster import DBSCAN
-# import hdbscan
-# GMM?
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -20,18 +21,6 @@ from sklearn.metrics import silhouette_score
 from sklearn.metrics import calinski_harabasz_score
 
 from statsmodels.stats.outliers_influence import variance_inflation_factor
-
-# ============================================================================
-# The script generates:
-#   - clustered_enriched_routes.csv, 
-#   - clustered_ranking_matrix.csv, 
-#   - representants_per_cluster.csv and 
-#   - clusters_summary.txt 
-#   for a city specified in main().
-# This script operates on the premise that in all files: 
-#   enriched_routes, ranking_matrix, clustered_enriched_routes and clustered_ranking_matrix
-#   under the same index we have the same path. 
-# ============================================================================
 
 """
 1. RANKING MATRICES
@@ -137,26 +126,56 @@ def choose_features():
 
     return features
 
-def get_ranking_matrix_path(city_name):
-    return f"../results/ranking_matrices/{city_name}_ranking_matrix.csv"
+def _find_single(run_dir, pattern: str) -> Path:
+    run_dir = Path(run_dir)
+    matches = sorted(run_dir.glob(pattern))
+    if len(matches) != 1:
+        raise RuntimeError(f"{run_dir}: expected 1 match for '{pattern}', found {len(matches)}: {[p.name for p in matches]}")
+    return matches[0]
 
-def get_enriched_routes_path(city_name):
-    return f"../results/enriched_routes/{city_name}_routes_enriched.csv"
+def get_ranking_matrix_path(run_dir) -> Path:
+    return _find_single(run_dir, "*_ranking_matrix.csv")
 
-def get_clustered_ranking_matrix_path(city_name):
-    return f"../results/clustered_routes/{city_name}_ranking_matrix_clustered.csv"
+def get_enriched_routes_path(run_dir) -> Path:
+    return _find_single(run_dir, "*_routes_enriched.csv")
 
-def get_clustered_enriched_routes_path(city_name):
-    return f"../results/clustered_routes/{city_name}_routes_enriched_clustered.csv"
+def get_clustered_ranking_matrix_path(run_dir) -> Path:
+    base = get_ranking_matrix_path(run_dir)
+    return base.with_name(base.name.replace("_ranking_matrix.csv", "_ranking_matrix_clustered.csv"))
 
-def get_representants_path(city_name):
-    return f"../results/clusters_representants/{city_name}_clusters_representants.csv"
+def get_clustered_enriched_routes_path(run_dir) -> Path:
+    base = get_enriched_routes_path(run_dir)
+    return base.with_name(base.name.replace("_routes_enriched.csv", "_routes_enriched_clustered.csv"))
 
-def get_clusters_summary_path(city_name):
-    return f"../results/clustering_summary/{city_name}_clusters_summary.txt"
+def get_representants_path(run_dir) -> Path:
+    base = get_ranking_matrix_path(run_dir)
+    return base.with_name(base.name.replace("_ranking_matrix.csv", "_clusters_representants.csv"))
 
-def get_num_of_clusters(city_name):
-    df = pd.read_csv(get_clustered_ranking_matrix_path(city_name))
+def get_clusters_summary_path(run_dir) -> Path:
+    base = get_ranking_matrix_path(run_dir)
+    return base.with_name(base.name.replace("_ranking_matrix.csv", "_clusters_summary.txt"))
+
+def get_action_masks_path(run_dir) -> Path:
+    base = get_ranking_matrix_path(run_dir)
+    return base.with_name(base.name.replace("_ranking_matrix.csv", "_action_masks.csv"))
+
+def get_clustering_config_path(run_dir) -> Path:
+    base = get_ranking_matrix_path(run_dir)
+    return base.with_name(base.name.replace("_ranking_matrix.csv", "_clustering_config.json"))
+
+def get_correlation_plot_path(run_dir) -> Path:
+    base = get_ranking_matrix_path(run_dir)
+    return base.with_name(base.name.replace("_ranking_matrix.csv", "_correlation.png"))
+
+def get_dataset_name(run_dir) -> str:
+    base = get_ranking_matrix_path(run_dir)
+    suffix = "_ranking_matrix.csv"
+    if not base.name.endswith(suffix):
+        raise RuntimeError(f"Unexpected ranking matrix filename: {base.name}")
+    return base.name[: -len(suffix)]
+
+def get_num_of_clusters(run_dir):
+    df = pd.read_csv(get_clustered_ranking_matrix_path(run_dir))
     return df["cluster"].nunique()
 
 def get_representant_for_cluster_and_agent(cluster_means, agent_paths):
@@ -174,21 +193,19 @@ def get_representant_for_cluster_and_agent(cluster_means, agent_paths):
 # ============================================================================
 
 def _get_active_features(df):
-    """Returns features that have non-zero variance (removes dead features)."""
-    return [f for f in choose_features() if df[f].std() > 1e-6]
+    return auto_select_features(df)
 
 # OK
-def cluster(city_name, clustering_algorithm, n_clusters, use_pca=False):
+def cluster(run_dir, clustering_algorithm, n_clusters, use_pca=False):
     """
     Clusters data for a given ranking matrix using a chosen clustering algorithm. 
     Optionally, performs PCA before the clustering.
     
-    :param city_name: saint_arnoult, ...
     :param clustering_algorithm: kmeans, agglomerative, dbscan, birch, hdbscan
     :return: (labels, model, X_clustered) where X_clustered is what the model actually saw
     """
 
-    df = pd.read_csv(get_ranking_matrix_path(city_name))
+    df = pd.read_csv(get_ranking_matrix_path(run_dir))
     features = _get_active_features(df)
     X = df[features]
 
@@ -216,83 +233,112 @@ def cluster(city_name, clustering_algorithm, n_clusters, use_pca=False):
     return labels, model, X_clustered
 
 # OK
-def save_clustering_results(city_name, labels):
-    df = pd.read_csv(get_ranking_matrix_path(city_name))
-    enriched_df = pd.read_csv(get_enriched_routes_path(city_name)) 
+def save_clustering_results(run_dir, labels):
+    df = pd.read_csv(get_ranking_matrix_path(run_dir))
+    enriched_df = pd.read_csv(get_enriched_routes_path(run_dir))
 
     # Add a cluster for each path in a new column
     df['cluster'] = labels
     enriched_df['cluster'] = labels
     
     # Save clustering statistics
-    with open(get_clusters_summary_path(city_name), "w") as f:
+    with open(get_clusters_summary_path(run_dir), "w") as f:
         print(df['cluster'].value_counts(), file=f)
 
     # Save original dfs but with an extra cluster column
-    df.to_csv(get_clustered_ranking_matrix_path(city_name), index=False)
-    enriched_df.to_csv(get_clustered_enriched_routes_path(city_name), index=False)
+    df.to_csv(get_clustered_ranking_matrix_path(run_dir), index=False)
+    enriched_df.to_csv(get_clustered_enriched_routes_path(run_dir), index=False)
 
 #!!!
-def get_masked_representants(city_name):
+def get_masked_representants(run_dir):
     """
     For each agent, selects one representative per cluster only if they have 
     a path in that cluster. Generates a mask indicating valid actions.
-    
-    :param city_name: saint_arnoult, ...
     """
 
     # Load clustered data
-    df_ranked = pd.read_csv(get_clustered_ranking_matrix_path(city_name))
-    df_enriched = pd.read_csv(get_clustered_enriched_routes_path(city_name))
+    df_ranked = pd.read_csv(get_clustered_ranking_matrix_path(run_dir))
+    df_enriched = pd.read_csv(get_clustered_enriched_routes_path(run_dir))
     features = _get_active_features(df_ranked)
 
     # Get cluster centroids
     centroids = df_ranked.groupby("cluster")[features].mean()
     num_clusters = len(centroids)
 
-    representants = []
+    all_representants = []
     masks = []
 
-    # For each agent, find the best path per cluster
+    # For each OD, find the best/most representative path per cluster
     for (origin, destination), group in df_ranked.groupby(["origins", "destinations"]):
+        od_representants = {} # keyed by cluster_id
         agent_mask = [0] * num_clusters
 
-        for cluster_id in range(num_clusters):
-            paths_in_cluster = group[group["cluster"] == cluster_id]
+        # Choose representants for clusters for each OD
+        for cluster in range(num_clusters):
+            paths_in_cluster_df = group[group["cluster"] == cluster]
+            paths_in_cluster = paths_in_cluster_df[features].to_numpy() # numpy for NearestNeighbors
+            centroid = centroids.loc[cluster].to_numpy()
 
-            if not paths_in_cluster.empty:
-                agent_paths_np = paths_in_cluster[features].to_numpy()
-                centroid_np = centroids.loc[cluster_id].to_numpy()
-                
-                _, local_idx = get_representant_for_cluster_and_agent(centroid_np, agent_paths_np)
-                global_idx = paths_in_cluster.index[local_idx]
+            if not paths_in_cluster_df.empty:
+                _, local_idx = get_representant_for_cluster_and_agent(centroid, paths_in_cluster)
+                # paths_in_cluster contains only a part of df_ranked 
+                # (only the paths for a given OD+cluster)
+                # but it keeps the original ("global") row indices of df_ranked
+                # get_representant... returns a local index of paths_in_cluster (e.g., 0 to 10 if there are 10 paths)
+                # to extract the actual route using this index, we must look up which global index it corresponds to
+                global_idx = paths_in_cluster_df.index[local_idx]
                 
                 representant = df_enriched.iloc[[global_idx]].copy()
-                representant["cluster_id"] = cluster_id
-                representants.append(representant)
+                representant["cluster"] = cluster
+                od_representants[cluster] = (global_idx, representant)
 
-                agent_mask[cluster_id] = 1
+                agent_mask[cluster] = 1
 
+        # ensure the shortest path for a given OD is always there in some cluster
+        # even if it's not the closest representant for this cluster
+        best_path_idx = group["free_flow_time"].idxmin() # index of the lowest fft route
+        selected_indices = {gidx for gidx, _ in od_representants.values()}
+        if best_path_idx not in selected_indices:
+            best_path_cluster = int(group.loc[best_path_idx, "cluster"])
+            best_path = df_enriched.iloc[[best_path_idx]].copy()
+            best_path["cluster"] = best_path_cluster
+            od_representants[best_path_cluster] = (best_path_idx, best_path)
+
+        all_representants.extend(rep for _, rep in od_representants.values())
         masks.append([origin, destination] + agent_mask)
 
-    all_representants = pd.concat(representants, ignore_index=True)
-    all_representants.to_csv(get_representants_path(city_name), index=False)
+    all_representants_concat = pd.concat(all_representants, ignore_index=True)
+    all_representants_concat.to_csv(get_representants_path(run_dir), index=False)
 
     mask_df = pd.DataFrame(masks, columns=['origins', 'destinations'] + [f'mask_{i}' for i in range(num_clusters)])
-    mask_df.to_csv(f"../results/clustered_routes/{city_name}_action_masks.csv", index=False)
+    mask_df.to_csv(get_action_masks_path(run_dir), index=False)
     mask_cols = [f'mask_{i}' for i in range(num_clusters)]
     print(f"Masking complete. Average actions per agent: {mask_df[mask_cols].sum(axis=1).mean():.2f}")
 
-def main(city_name):
-    labels, _, _ = cluster(city_name, "kmeans", 5, False)
-    save_clustering_results(city_name, labels)
-    get_masked_representants(city_name)
+def cluster_save(run_dir, clustering_algorithm, n_clusters, use_pca=False):
+    dataset_name = get_dataset_name(run_dir)
+    labels, _, _ = cluster(run_dir, clustering_algorithm, n_clusters, use_pca)
+    save_clustering_results(run_dir, labels)
+    get_masked_representants(run_dir)
+
+    df = pd.read_csv(get_clustered_ranking_matrix_path(run_dir))
+    features_used = _get_active_features(df)
+
+    summary = {
+        "run_name": Path(run_dir).name,
+        "city_name": dataset_name,
+        "algorithm": clustering_algorithm,
+        "n_clusters": n_clusters,
+        "use_pca": use_pca,
+        "features_used": features_used,
+    }
+    with open(get_clustering_config_path(run_dir), "w") as f:
+        json.dump(summary, f, indent=2)
 
     print("\nCluster Statistics:")
-    df = pd.read_csv(get_clustered_ranking_matrix_path(city_name))
     print(df['cluster'].value_counts())
 
-def evaluate(city_name):
+def evaluate(run_dir):
     """
     Intrinsic evaluation sweep to find the best algorithm and number of clusters.
     """
@@ -301,7 +347,7 @@ def evaluate(city_name):
     for use_pca in [True, False]:#, False]:
         for n_clusters in range(2, 7):
             for alg in ["kmeans"]:#, "agglomerative"]:#, "birch"]:
-                labels, model, X_clustered = cluster(city_name, alg, n_clusters, use_pca)
+                labels, model, X_clustered = cluster(run_dir, alg, n_clusters, use_pca)
 
                 # measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation)
                 # -1 to 1; the higher the better
@@ -314,7 +360,7 @@ def evaluate(city_name):
                 # only KMeans has inertia
                 inertia = getattr(model, "inertia_", None)
 
-                df_ranked = pd.read_csv(get_ranking_matrix_path(city_name))
+                df_ranked = pd.read_csv(get_ranking_matrix_path(run_dir))                
                 df_ranked['cluster'] = labels
                 action_coverage = df_ranked.groupby(["origins", "destinations"])['cluster'].nunique().mean()
 
@@ -327,8 +373,9 @@ def evaluate(city_name):
 
     return pd.DataFrame(results).sort_values(by="silhouette", ascending=False)
 
-def check_vif(city_name):
-    df = pd.read_csv(get_ranking_matrix_path(city_name))
+def check_vif(run_dir):
+    dataset_name = get_dataset_name(run_dir)
+    df = pd.read_csv(get_ranking_matrix_path(run_dir))
     features = _get_active_features(df)
     X = df[features]
     
@@ -338,23 +385,20 @@ def check_vif(city_name):
     vif_data["feature"] = features
     vif_data["VIF"] = [variance_inflation_factor(X_std, i) for i in range(X_std.shape[1])]
     
-    print(f"\n--- VIF Analysis for {city_name} ---")
+    print(f"\n--- VIF Analysis for {dataset_name} ---")
     print(vif_data.sort_values("VIF", ascending=False))
     return vif_data
 
-# MOVE THIS SOMEWHERE ELSE LATER, maybe as a separate script
-def plot_correlation_matrix(city_name):
-    """
-    Generates a heatmap of feature correlations to identify redundant features.
-    """
-    # df = pd.read_csv(get_ranking_matrix_path(city_name))
-    df = pd.read_csv(get_enriched_routes_path(city_name))
+def plot_correlation_matrix(run_dir):
+    """Generates a heatmap of feature correlations to identify redundant features."""
+    dataset_name = get_dataset_name(run_dir)
+    df = pd.read_csv(get_enriched_routes_path(run_dir))
     features = choose_features()
     corr = df[features].corr()  # type: ignore
     
 
     # --- Console Output for Analysis ---
-    print(f"\n--- Highly correlated features (> 0.75) for {city_name} ---")
+    print(f"\n--- Highly correlated features (> 0.75) for {dataset_name} ---")
     # Use a mask to only look at the upper triangle (avoiding duplicates)
     upper = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
     # upper = np.asarray(np.triu(np.ones(corr.shape), k=1).astype(bool)).nonzero()
@@ -380,18 +424,17 @@ def plot_correlation_matrix(city_name):
     sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', center=0, 
                 square=True, linewidths=.5, cbar_kws={"shrink": .8})
     
-    plt.title(f"Feature Correlation Matrix - {city_name}", fontsize=16)
+    plt.title(f"Feature Correlation Matrix - {dataset_name}", fontsize=16)
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     
-    output_path = f"../results/clustering_summary/{city_name}_correlation.png"
+    output_path = get_correlation_plot_path(run_dir)
     plt.savefig(output_path)
     plt.close()
     print(f"Correlation heatmap saved to: {output_path}")
 
-def diagnose_features(city_name):
-    # df = pd.read_csv(get_ranking_matrix_path(city_name))
-    df = pd.read_csv(get_enriched_routes_path(city_name))
+def diagnose_features(run_dir):
+    df = pd.read_csv(get_enriched_routes_path(run_dir))
     features = choose_features()
     
     stats = []
@@ -409,20 +452,103 @@ def diagnose_features(city_name):
     print("\n--- Feature Diagnostics ---")
     print(diag_df.to_string(index=False))
 
-def describe_clusters(city_name):
-    df = pd.read_csv(get_clustered_enriched_routes_path(city_name))
+def describe_clusters(run_dir):
+    df = pd.read_csv(get_clustered_enriched_routes_path(run_dir))
     features = _get_active_features(df)
 
     centroids = df.groupby("cluster")[features].mean() # why no id?
     return centroids
 
-if __name__ == "__main__":
-    for city_name in ["saint_arnoult"]:#, "beynes", "provins"]:
-        plot_correlation_matrix(city_name)
-        diagnose_features(city_name)
-        check_vif(city_name)
-        results = evaluate(city_name)
-        print(results)
-        print(describe_clusters(city_name))
+def auto_select_features(df, vif_threshold=10.0, corr_threshold=0.85):
+    """
+    Automatically select features by removing:
+    1. Zero-variance features
+    2. One member of each highly correlated pair
+    3. High-VIF features (iteratively)
+    """
+    
+    all_features = choose_features()
 
-        # main(city_name)
+    # 1 - Remove zero-variance features
+    features = [f for f in all_features if f in df.columns and df[f].std() > 1e-6]
+
+    # 2 - Remove one feature from each highly correlated pair
+    # Keeping the feature that has lower mean correlation
+    corr = df[features].corr().abs()
+    to_drop = set()
+    for i in range(len(features)):
+        if features[i] in to_drop: continue
+        for j in range(i+1, len(features)): # skip i first features to avoid duplication
+            if features[j] in to_drop: continue
+            if corr.iloc[i, j] > corr_threshold:
+                mean_corr_i = corr.iloc[i].drop(features[i]).mean()
+                mean_corr_j = corr.iloc[j].drop(features[j]).mean()
+                if mean_corr_i > mean_corr_j:
+                    to_drop.add(features[i])
+                else:
+                    to_drop.add(features[j])
+    features = [f for f in features if f not in to_drop]
+
+    # 3 - Iteratively remove high-VIF features
+    while len(features) > 2:
+        X_std = StandardScaler().fit_transform(df[features])
+        vifs = [variance_inflation_factor(X_std, i) for i in range(len(features))]
+        max_vif = max(vifs)
+        if max_vif <= vif_threshold:
+            break
+        worst_idx = vifs.index(max_vif)
+        removed = features.pop(worst_idx)
+
+    return features
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Cluster ranking matrices of enriched route data from SUMO networks",
+    )
+    parser.add_argument(
+        "--alg", "-a",
+        help="Choose the clustering algorithm: kmeans/agglomerative",
+        default="kmeans"
+    )
+    parser.add_argument(
+        "--n_clusters",
+        type=int,
+        help="How many clusters?",
+        default=4
+    )
+    parser.add_argument( # false by default
+        "--pca",
+        help="Use pca?",
+        action="store_true"
+    )
+    parser.add_argument(
+        "--run-name", "-r",
+        nargs="+",
+        required=True,
+        help="Run folder name inside results/ (e.g. ingolstadt_k4). All files saved flat inside results/<run-name>/."
+    )
+    args = parser.parse_args()
+
+    if not args.run_name:
+        print("No run-name provided. Usage: clustering.py --run-name run-name")
+        return
+    
+    this_file = Path(__file__).resolve()
+    repo_root = this_file.parents[1]
+
+    for run_name in args.run_name:
+        results_dir = repo_root / "results" / run_name
+        if not results_dir.is_dir():
+            raise RuntimeError(f"Run directory does not exist: {results_dir}")
+
+        cluster_save(results_dir, args.alg, args.n_clusters, args.pca)
+        ###
+        plot_correlation_matrix(results_dir)
+        diagnose_features(results_dir)
+        check_vif(results_dir)
+        results = evaluate(results_dir)
+        print(results)
+        print(describe_clusters(results_dir))
+
+if __name__ == "__main__":
+    main()
