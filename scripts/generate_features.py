@@ -745,7 +745,7 @@ def main():
     path_gen_kwargs['forbid_junction_revisit'] = True
     path_gen_kwargs['collapse_internal_junctions'] = True
 
-    with open(run_dir / "path_gen_kwargs.json", "w") as f:
+    with open(run_dir / f"{run_dir.name}_path_gen_kwargs.json", "w") as f:
         json.dump(path_gen_kwargs, f, indent=2)
 
     stages = [
