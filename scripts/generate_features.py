@@ -361,7 +361,7 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, run_dir
 
     all_routes = []
     start_time = time.time()
-    network = jx.build_digraph(str(con_file), str(edg_file), str(rou_file))
+    network = jx.build_digraph(str(con_file), str(edg_file), str(rou_file), use_clustered_routes=True)
 
     # sample routes for each OD pair, not for each agent because multiple agents might have the same OD pair
     unique_od_pairs = agents[["origin", "destination"]].drop_duplicates()
@@ -370,7 +370,7 @@ def generate_csv_routes(name: str, net_dir: Path, path_gen_kwargs: dict, run_dir
     # instead, take agents.csv (order of hundreds)
     for o_id, d_id in zip(unique_od_pairs["origin"], unique_od_pairs["destination"]):
         try:
-            routes = jx.extended_generator(
+            routes = jx.clustering_generator(
                 network, 
                 [origins[o_id]], 
                 [destinations[d_id]],
@@ -731,14 +731,13 @@ def main():
         "random_seed": 42,
     }
 
-    # NEW (basic):
+    # Clustering generator tuning:
     path_gen_kwargs['max_resample_iterations'] = 50
-    path_gen_kwargs['version'] = "extended3" # extended3/extended
-    path_gen_kwargs['diverse_selection'] = False #True/False
+    path_gen_kwargs['diverse_selection'] = False
     path_gen_kwargs['keep_generating'] = False # only with diverse_selection=True
     path_gen_kwargs['min_difference_jaccard'] = 0.1 # only with diverse_selection=True
 
-    # NEW (extended) - only with extended3:
+    # Clustered-route traversal constraints:
     path_gen_kwargs['forbid_abs_reuse'] = True
     path_gen_kwargs['collapse_destination'] = True
     path_gen_kwargs['collapse_origin'] = True
