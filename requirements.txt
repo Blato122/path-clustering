@@ -19,7 +19,7 @@ joblib==1.5.2
 tqdm==4.67.1
 statsmodels==0.14.6
 
-janux @ git+https://github.com/Blato122/JanuX.git@feat/path-clustering
+janux @ git+https://github.com/COeXISTENCE-PROJECT/JanuX.git@feat/path-clustering
 # Installs a released (non-editable) copy from the 'feat/path-clustering' Git branch into the venv
 # To pick up new commits you must re-run: 
 # pip install --upgrade --force-reinstall 'git+https://...@branch#egg=janux'
