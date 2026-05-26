@@ -9,7 +9,6 @@ swifter==1.4.0
 matplotlib==3.10.7
 seaborn==0.13.2
 scikit-learn==1.7.2
-# hdbscan==0.8.41
 requests==2.32.5
 geopy==2.4.1
 shapely==2.1.2
@@ -18,8 +17,9 @@ geopandas==1.1.1
 joblib==1.5.2
 tqdm==4.67.1
 statsmodels==0.14.6
+# janux==1.1.0
 
-janux @ git+https://github.com/COeXISTENCE-PROJECT/JanuX.git@feat/path-clustering
+# janux @ git+https://github.com/COeXISTENCE-PROJECT/JanuX.git@feat/path-clustering
 # Installs a released (non-editable) copy from the 'feat/path-clustering' Git branch into the venv
 # To pick up new commits you must re-run: 
 # pip install --upgrade --force-reinstall 'git+https://...@branch#egg=janux'
@@ -30,7 +30,6 @@ janux @ git+https://github.com/COeXISTENCE-PROJECT/JanuX.git@feat/path-clusterin
 
 # janux @ git+https://github.com/Blato122/JanuX.git@feat/path-clustering#egg=janux
 
-# janux @ file://../JanuX
+janux @ file://../JanuX
 # place JanuX fork in the same directory as path-clustering (siblings)
 # e.g. /COeXISTENCE/path-clustering and /COeXISTENCE/JanuX
-

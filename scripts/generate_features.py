@@ -733,9 +733,9 @@ def main():
 
     # Clustering generator tuning:
     path_gen_kwargs['max_resample_iterations'] = 50
-    path_gen_kwargs['diverse_selection'] = False
-    path_gen_kwargs['keep_generating'] = False # only with diverse_selection=True
-    path_gen_kwargs['min_difference_jaccard'] = 0.1 # only with diverse_selection=True
+    path_gen_kwargs['diverse_selection'] = True
+    path_gen_kwargs['keep_generating'] = True # only with diverse_selection=True
+    path_gen_kwargs['min_difference_jaccard'] = 0.4 # only with diverse_selection=True
 
     # Clustered-route traversal constraints:
     path_gen_kwargs['forbid_abs_reuse'] = True
