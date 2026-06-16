@@ -1,4 +1,5 @@
 from pathlib import Path
+import ast
 import hashlib
 from importlib.resources import files
 import janux as jx
@@ -44,7 +45,7 @@ CLUSTER_FEATURES = [
         - <name>.con.xml
         - <name>.edg.xml
         - <name>.rou.xml
-        - od_<name>.json
+        - od_<name>.json or od_<name>.txt
         - agents.csv
     Outputs:
         - <name>_routes.csv
@@ -127,6 +128,24 @@ def validate_and_prepare_routes(routes: pd.DataFrame, context: str) -> pd.DataFr
         raise ValueError(f"{context}: generated duplicate route IDs")
 
     return routes
+
+
+def load_od_file(network_dir: Path, name: str) -> dict:
+    json_path = network_dir / f"od_{name}.json"
+    txt_path = network_dir / f"od_{name}.txt"
+
+    if json_path.exists():
+        return jx.utils.read_json(json_path)
+    if txt_path.exists():
+        with txt_path.open("r", encoding="utf-8") as file:
+            data = ast.literal_eval(file.read())
+        if not isinstance(data, dict):
+            raise ValueError(f"OD file must contain a dictionary: {txt_path}")
+        return data
+
+    raise FileNotFoundError(
+        f"{name}: missing OD file. Expected one of: {json_path}, {txt_path}"
+    )
 
 def load_sumo_nodes(nod_file: Path) -> dict:
     """Parses .nod.xml to get a mapping of node_id -> (x, y)."""
@@ -443,7 +462,6 @@ def generate_csv_routes(
         net_dir / name / f"{name}.con.xml",
         net_dir / name / f"{name}.edg.xml",
         net_dir / name / f"{name}.rou.xml",
-        net_dir / name / f"od_{name}.json",
         net_dir / name / "agents.csv"
     ]
     
@@ -453,12 +471,17 @@ def generate_csv_routes(
             f"{name}: missing required files for route generation: {missing_files}"
         )
 
-    con_file, edg_file, rou_file, ods_file, agents_file = required_files
+    con_file, edg_file, rou_file, agents_file = required_files
 
-    ods = jx.utils.read_json(ods_file)
+    ods = load_od_file(net_dir / name, name)
     agents = pd.read_csv(agents_file)
-    origins = ods["origins"]
-    destinations = ods["destinations"]
+    try:
+        origins = ods["origins"]
+        destinations = ods["destinations"]
+    except KeyError as exc:
+        raise ValueError(
+            f"{name}: OD file must contain 'origins' and 'destinations'"
+        ) from exc
 
     all_routes = []
     failed_ods = []

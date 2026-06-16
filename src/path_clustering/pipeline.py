@@ -24,6 +24,24 @@ class ClusteredRouteOutputs:
     diagnostics: Path | None = None
 
 
+def _next_available_route_set_dir(network_folder: Path, route_set: str) -> Path:
+    if Path(route_set).name != route_set:
+        raise ValueError("route_set must be a directory name, not a path")
+
+    clustered_routes_dir = network_folder / "clustered_routes"
+    output_dir = clustered_routes_dir / route_set
+
+    if not output_dir.exists() or not any(output_dir.iterdir()):
+        return output_dir
+
+    suffix = 2
+    while True:
+        candidate = clustered_routes_dir / f"{route_set}-{suffix}"
+        if not candidate.exists() or not any(candidate.iterdir()):
+            return candidate
+        suffix += 1
+
+
 # Do not call main() functions (intended for CLI use)
 def generate_clustered_routes(
     network_name: str,
@@ -106,11 +124,43 @@ def generate_clustered_routes(
         diagnostics=diagnostics_path,
     )
 
+
+def generate_named_route_set(
+    network_folder: Path,
+    route_set: str,
+    config: str | Path = "clustering-default",
+) -> ClusteredRouteOutputs:
+    """
+    Generate a named URB route set under:
+      <network_folder>/clustered_routes/<route_set>
+
+    If that directory already exists and contains files, a numeric suffix is
+    appended to avoid overwriting previous experimental outputs.
+    """
+    network_folder = Path(network_folder).resolve()
+    output_dir = _next_available_route_set_dir(network_folder, route_set)
+
+    return generate_clustered_routes(
+        network_name=network_folder.name,
+        network_root=network_folder.parent,
+        output_dir=output_dir,
+        config=config,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--network", required=True)
-    parser.add_argument("--network-root", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--network-folder",
+        type=Path,
+        required=True,
+        help="URB network folder, e.g. URB/networks/ingolstadt_custom.",
+    )
+    parser.add_argument(
+        "--route-set",
+        required=True,
+        help="Name written under <network-folder>/clustered_routes/.",
+    )
     parser.add_argument(
         "--config",
         default="clustering-default",
@@ -118,13 +168,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    outputs = generate_clustered_routes(
-        network_name=args.network,
-        network_root=args.network_root,
-        output_dir=args.output_dir,
+    outputs = generate_named_route_set(
+        network_folder=args.network_folder,
+        route_set=args.route_set,
         config=args.config,
     )
 
+    print(f"Route set directory: {outputs.representants.parent}")
     print(f"Representants: {outputs.representants}")
     print(f"Action masks: {outputs.action_masks}")
     print(f"Clustering config: {outputs.clustering_config}")
