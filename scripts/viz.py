@@ -1,18 +1,12 @@
-import matplotlib
-matplotlib.use("Agg")
-
 import argparse
 import json
 import random
 from itertools import product
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-import networkx as nx
 import pandas as pd
-import janux as jx
-from PIL import Image, ImageDraw, ImageFont
-from janux.visualizers.visualization_utils import create_graph, get_colors, parse_network_files, shift_edge_by_offset
+
+from janux.visualizers import show_multi_routes
 
 
 def parse_path_cell(value) -> list[str]:
@@ -98,130 +92,6 @@ def pick_routes_file(files: list[Path], only_label_contains: str | None) -> Path
     # Highest score wins; tie-break by label then filename
     candidates_sorted = sorted(candidates, key=lambda f: (score(f)[0], score(f)[1], f.name), reverse=True)
     return candidates_sorted[0]
-
-
-def visualize_paths_with_labels(
-    graph: nx.DiGraph,
-    paths: list[list[str]],
-    origin_edge: str,
-    destination_edge: str,
-    path_labels: list[str] | None = None,
-    show: bool = True,
-    save_file_path: str | None = None,
-    title: str = "Path Visualization",
-    cmap_names: list[str] = ['Reds', 'Blues', 'Greens', 'Oranges', 'Greys', 'Purples', 'copper', 'pink'],
-    offsets: list | None = None,
-    fig_size: tuple[int, int] = (12, 8),
-    autocrop: bool = True,
-    autocrop_margin: float = 10,
-    xcrop: tuple[float, float] | None = None,
-    ycrop: tuple[float, float] | None = None,
-    node_size: int = 10,
-    node_color: str = 'lightblue',
-    path_width: int = 4,
-) -> None:
-    if offsets is None:
-        margin_between_paths = path_width / 5
-        offsets = [((path_width / 2) + margin_between_paths) + ((path_width + margin_between_paths) * i) for i in range(len(paths))]
-
-    plt.figure(figsize=fig_size)
-
-    node_positions = nx.get_node_attributes(graph, 'pos')
-    nx.draw(graph, node_positions, node_size=node_size, node_color=node_color, style='--', edge_color='gray', arrows=False)
-
-    origin_coords, dest_coords = None, None
-    for source_node, target_node, edge_id in graph.edges(data=True):
-        if edge_id['edge_id'] == origin_edge:
-            origin_coords = (source_node, target_node)
-            if dest_coords is not None:
-                break
-        elif edge_id['edge_id'] == destination_edge:
-            dest_coords = (source_node, target_node)
-            if origin_coords is not None:
-                break
-
-    assert origin_coords is not None, f"Origin {origin_edge} is not found in the network."
-    assert dest_coords is not None, f"Destination {destination_edge} is not found in the network."
-
-    x_max, x_min, y_max, y_min = float('-inf'), float('inf'), float('-inf'), float('inf')
-    artists = []
-
-    for path_idx, path_edges in enumerate(paths):
-        path_edges_graph = {
-            data_dict['edge_id']: (source, target)
-            for source, target, data_dict in graph.edges(data=True)
-            if data_dict['edge_id'] in path_edges
-        }
-        cmap_name = cmap_names[path_idx % len(cmap_names)]
-        colors = get_colors(len(path_edges), cmap_name)
-        label = path_labels[path_idx] if path_labels and path_idx < len(path_labels) else f"Path {path_idx}"
-
-        for edge_id, (source_node, target_node) in path_edges_graph.items():
-            new_pos = shift_edge_by_offset(node_positions, source_node, target_node, offsets[path_idx])
-            color = colors[path_edges.index(edge_id)]
-            nx.draw_networkx_edges(graph, new_pos, edgelist=[(source_node, target_node)], edge_color=[color], width=path_width)
-
-            if autocrop:
-                x_max = max(x_max, new_pos[source_node][0], new_pos[target_node][0])
-                x_min = min(x_min, new_pos[source_node][0], new_pos[target_node][0])
-                y_max = max(y_max, new_pos[source_node][1], new_pos[target_node][1])
-                y_min = min(y_min, new_pos[source_node][1], new_pos[target_node][1])
-
-        artist = plt.Line2D([0], [0], color=colors[len(colors) // 2], lw=path_width, label=label)
-        artists.append(artist)
-
-    if autocrop:
-        x_range_length = x_max - x_min
-        y_range_length = y_max - y_min
-        cropped_aspect_ratio = y_range_length / x_range_length
-
-        fig_width, fig_height = fig_size
-        fig_aspect_ratio = fig_height / fig_width
-        if cropped_aspect_ratio > fig_aspect_ratio:
-            x_range_length_new = (cropped_aspect_ratio / fig_aspect_ratio) * x_range_length
-            difference = x_range_length_new - x_range_length
-            x_max += difference / 2
-            x_min -= difference / 2
-        else:
-            y_range_length_new = (fig_aspect_ratio / cropped_aspect_ratio) * y_range_length
-            difference = y_range_length_new - y_range_length
-            y_max += difference / 2
-            y_min -= difference / 2
-
-        plt.xlim(x_min - autocrop_margin, x_max + autocrop_margin)
-        plt.ylim(y_min - autocrop_margin, y_max + autocrop_margin)
-    else:
-        if xcrop is not None:
-            plt.xlim(xcrop)
-        if ycrop is not None:
-            plt.ylim(ycrop)
-
-    plt.title(title)
-    plt.legend(handles=artists)
-    fig = plt.gcf()
-    fig.canvas.manager.set_window_title(title)
-
-    if save_file_path is not None:
-        plt.savefig(save_file_path, bbox_inches='tight', dpi=300)
-
-    if show:
-        plt.show()
-
-    plt.close()
-
-
-def show_multi_routes_with_labels(
-    nod_file_path: str,
-    edg_file_path: str,
-    paths: list[list[str]],
-    origin: str,
-    destination: str,
-    path_labels: list[str] | None = None,
-    **kwargs,
-):
-    nodes, edges = parse_network_files(nod_file_path, edg_file_path)
-    graph = create_graph(nodes, edges)
-    visualize_paths_with_labels(graph, paths, origin, destination, path_labels=path_labels, **kwargs)
 
 
 def main():
@@ -343,6 +213,7 @@ def main():
             print(f"  Sampled ODs: {len(sampled_ods)} (seed={args.seed})")
 
             images: list[tuple[int, Path]] = []
+
             for od_idx, (origin, destination) in enumerate(sampled_ods):
                 od_df = df[
                     (df["origins"].astype(str) == str(origin)) &
@@ -353,7 +224,6 @@ def main():
 
                 paths_with_cluster: list[tuple[int, list[str]]] = []
                 paths_plain: list[list[str]] = []
-                path_labels: list[str] = []
 
                 has_cluster = "cluster" in od_df.columns
 
@@ -374,25 +244,22 @@ def main():
                 if has_cluster:
                     ordered = sorted(paths_with_cluster, key=lambda t: t[0])
                     paths = [p for _, p in ordered]
-                    path_labels = [f"cluster {cl}" for cl, _ in ordered]
                 else:
                     paths = paths_plain
-                    path_labels = [f"Path {i}" for i in range(len(paths))]
 
                 if not paths:
                     continue
 
-                out_png = city_out / f"{city}_{run_name}_od{od_idx}.png" # no extra intermediate /city dir after run dir
+                out_png = city_out / f"{city}_{run_name}_od{od_idx}.png"  # no extra intermediate /city dir after run dir
                 title = f"{run_name} | {city} | {label} | OD{od_idx}: {safe_od_tag(origin, destination)} | n={len(paths)}"
 
                 try:
-                    show_multi_routes_with_labels(
+                    show_multi_routes(
                         nod_file_path=str(nod_file),
                         edg_file_path=str(edg_file),
                         paths=paths,  # ALL routes
                         origin=str(origin),
                         destination=str(destination),
-                        path_labels=path_labels,
                         autocrop=True,
                         title=title,
                         save_file_path=str(out_png),

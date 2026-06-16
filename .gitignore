@@ -1,6 +1,8 @@
 scripts/__pycache__
-# Ile-de-france
+scripts/utils
 .venv
-# .vscode
 osm
 results
+test_data
+analysis
+configs/configs_README.md

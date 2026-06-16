@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: path-clustering
+Version: 0.1.0
+Summary: Route generation, feature enrichment, and clustering for URB
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: janux==1.1.0
+Requires-Dist: lxml>=6.0
+Requires-Dist: numpy>=2.0
+Requires-Dist: pandas>=2.0
+Requires-Dist: scikit-learn>=1.7
+Requires-Dist: statsmodels>=0.14
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+
+# Alternative generator not supported with JanuX 1.1.0! And this is the most recent version on pip anyway!

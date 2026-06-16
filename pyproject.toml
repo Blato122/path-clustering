@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "path-clustering"
+version = "0.1.0"
+description = "Route generation, feature enrichment, and clustering for URB"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "janux==1.1.0",
+    "lxml>=6.0",
+    "numpy>=2.0",
+    "pandas>=2.0",
+    "scikit-learn>=1.7",
+    "statsmodels>=0.14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+]
+analysis = [
+    "matplotlib>=3.10",
+    "seaborn>=0.13",
+]
+
+[project.scripts]
+path-clustering-generate = "path_clustering.generation:main"
+path-clustering-cluster = "path_clustering.clustering:main"
+path-clustering-run = "path_clustering.pipeline:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+path_clustering = ["configs/*.json"]

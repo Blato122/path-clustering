@@ -1,0 +1,4 @@
+[console_scripts]
+path-clustering-cluster = path_clustering.clustering:main
+path-clustering-generate = path_clustering.generation:main
+path-clustering-run = path_clustering.pipeline:main
