@@ -376,7 +376,7 @@ def calculate_circuity(df: pd.DataFrame, total_len: float) -> float | None:
 def load_config(config_arg: str | Path) -> tuple[dict, str]:
     """
     Load a config from an explicit filesystem path or from the package's
-    bundled configs when given a bare name such as ``clustering-default``.
+    bundled configs when given a bare name such as ``run-default``.
     """
     config_path = Path(config_arg)
     if config_path.exists():
@@ -922,28 +922,34 @@ def main():
     parser.add_argument(
         "--name", "-n",
         nargs="+",
-        help="One or more network names to process (e.g. --name city another_city). If omitted, all networks in data/ are processed."
+        help="One or more network names to process. If omitted, all network folders in --data-dir are processed."
     )
     parser.add_argument(
         "--run-name", "-r",
-        help="Name for this run's output folder inside results/ (e.g. ingolstadt_1)."
+        help="Name for this run's output folder inside --results-dir."
     )
     parser.add_argument(
         "--data-dir",
         type=Path,
-        help="Directory containing one subdirectory per SUMO network. Defaults to data/."
+        required=True,
+        help="Directory containing one subdirectory per SUMO network."
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         help="Explicit output directory. Cannot be combined with --run-name."
     )
+    parser.add_argument(
+        "--results-dir",
+        type=Path,
+        help="Base directory used with --run-name.",
+    )
 
     # Config, generator
     parser.add_argument(
         "--config", "-c",
         type=str,
-        default="clustering-default",
+        default="generate-default",
         help="Explicit config path or bundled config name."
     )
     parser.add_argument(
@@ -961,16 +967,15 @@ def main():
     if args.all:
         args.routes = args.features = args.enrich = True
 
-    this_file = Path(__file__).resolve()
-    # .../path-clustering/scripts/generate_csv_routes.py -> .../path-clustering
-    repo_root = this_file.parents[1]
-
     if args.output_dir is not None and args.run_name is not None:
         parser.error("--output-dir and --run-name cannot be used together")
     if args.output_dir is None and args.run_name is None:
         parser.error("one of --run-name or --output-dir is required")
+    if args.run_name is not None and args.results_dir is None:
+        parser.error("--results-dir is required when using --run-name")
+
     # Network data
-    data_dir = (args.data_dir or repo_root / "data").resolve()
+    data_dir = args.data_dir.resolve()
     if not data_dir.is_dir():
         raise FileNotFoundError(f"Network data directory does not exist: {data_dir}")
 
@@ -978,7 +983,7 @@ def main():
     run_dir = (
         args.output_dir.resolve()
         if args.output_dir is not None
-        else (repo_root / "results" / args.run_name).resolve()
+        else (args.results_dir / args.run_name).resolve()
     )
     run_dir.mkdir(parents=True, exist_ok=True)
     

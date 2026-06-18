@@ -21,10 +21,6 @@ dependencies = [
 dev = [
     "pytest>=8",
 ]
-analysis = [
-    "matplotlib>=3.10",
-    "seaborn>=0.13",
-]
 
 [project.scripts]
 path-clustering-generate = "path_clustering.generation:main"

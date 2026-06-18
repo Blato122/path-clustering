@@ -10,7 +10,7 @@ from sklearn.metrics import calinski_harabasz_score, silhouette_score
 from sklearn.preprocessing import StandardScaler
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-from .generation import CLUSTER_FEATURES
+from .generation import CLUSTER_FEATURES, load_config
 
 
 def discover_paths(run_dir: Path) -> dict[str, Path | str]:
@@ -470,24 +470,30 @@ def main():
     parser.add_argument(
         "--alg", "-a",
         choices=["kmeans", "agglomerative", "birch"],
-        default="kmeans",
+        default=None,
         help="Clustering algorithm.",
     )
     parser.add_argument(
         "--n_clusters", "-n",
         type=int,
-        default=4,
+        default=None,
         help="Number of clusters.",
     )
     parser.add_argument(
         "--diag", "-d",
         action="store_true",
+        default=None,
         help="Save additional clustering diagnostics as JSON.",
+    )
+    parser.add_argument(
+        "--config", "-c",
+        default="cluster-default",
+        help="Explicit config path or bundled config name.",
     )
     parser.add_argument(
         "--run-name", "-r",
         nargs="+",
-        help="Run folder names inside the results directory.",
+        help="Run folder names inside --results-dir.",
     )
     parser.add_argument(
         "--run-dir",
@@ -498,25 +504,42 @@ def main():
     parser.add_argument(
         "--results-dir",
         type=Path,
-        help="Base directory used with --run-name. Defaults to results/.",
+        help="Base directory used with --run-name.",
     )
     args = parser.parse_args()
 
-    repo_root = Path(__file__).resolve().parents[1]
     run_dirs = [path.resolve() for path in (args.run_dir or [])]
-    results_root = (args.results_dir or repo_root / "results").resolve()
+    if args.run_name and args.results_dir is None:
+        parser.error("--results-dir is required when using --run-name")
+
+    results_root = args.results_dir.resolve() if args.results_dir else None
     run_dirs.extend(results_root / name for name in (args.run_name or []))
     if not run_dirs:
         parser.error("at least one --run-name or --run-dir is required")
+
+    config, config_source = load_config(args.config)
+    clustering_settings = config.get("clustering", config)
+    if not isinstance(clustering_settings, dict):
+        raise ValueError(
+            f"Clustering config must be a JSON object: {config_source}"
+        )
+
+    algorithm = args.alg or clustering_settings.get("algorithm", "kmeans")
+    n_clusters = args.n_clusters or clustering_settings.get("n_clusters", 4)
+    diagnostics = (
+        args.diag
+        if args.diag is not None
+        else clustering_settings.get("diagnostics", False)
+    )
 
     for run_dir in run_dirs:
         if not run_dir.is_dir():
             raise RuntimeError(f"Run directory does not exist: {run_dir}")
         run_clustering(
             run_dir,
-            args.alg,
-            args.n_clusters,
-            diagnostics=args.diag,
+            algorithm,
+            n_clusters,
+            diagnostics=diagnostics,
         )
 
 

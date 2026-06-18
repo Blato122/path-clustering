@@ -47,7 +47,7 @@ def generate_clustered_routes(
     network_name: str,
     network_root: Path,
     output_dir: Path,
-    config: str | Path = "clustering-default",
+    config: str | Path = "run-default",
 ) -> ClusteredRouteOutputs:
     network_root = Path(network_root).resolve()
     output_dir = Path(output_dir).resolve()
@@ -128,7 +128,7 @@ def generate_clustered_routes(
 def generate_named_route_set(
     network_folder: Path,
     route_set: str,
-    config: str | Path = "clustering-default",
+    config: str | Path = "run-default",
 ) -> ClusteredRouteOutputs:
     """
     Generate a named URB route set under:
@@ -163,7 +163,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--config",
-        default="clustering-default",
+        default="run-default",
         help="Explicit config path or bundled config name.",
     )
     args = parser.parse_args()

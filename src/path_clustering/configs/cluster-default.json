@@ -1,0 +1,5 @@
+{
+    "algorithm": "kmeans",
+    "n_clusters": 4,
+    "diagnostics": false
+}

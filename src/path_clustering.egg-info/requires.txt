@@ -1,9 +1,0 @@
-janux==1.1.0
-lxml>=6.0
-numpy>=2.0
-pandas>=2.0
-scikit-learn>=1.7
-statsmodels>=0.14
-
-[dev]
-pytest>=8
