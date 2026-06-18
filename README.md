@@ -1,6 +1,6 @@
 # path-clustering
 
-Route generation, feature enrichment, and clustering utilities for URB route sets.
+Route generation, feature enrichment, and clustering pipeline for URB.
 
 Note: the alternative generator is not supported with JanuX 1.1.0.
 

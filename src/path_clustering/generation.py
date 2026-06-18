@@ -31,6 +31,7 @@ CLUSTER_FEATURES = [
     "left_yield_turns_per_km",
 
     # Geometry / urban complexity
+    "mean_circuity",
     "edges_per_km",
 
     # Relative spatial distinctness
@@ -86,7 +87,7 @@ def make_route_id(origin, destination, path: str) -> str:
     ]).encode("utf-8")
     return hashlib.sha256(route_key).hexdigest()
 
-def validate_and_prepare_routes(routes: pd.DataFrame, context: str) -> pd.DataFrame:
+def prepare_routes(routes: pd.DataFrame, context: str) -> pd.DataFrame:
     required_columns = {"origins", "destinations", "path", "free_flow_time"}
     missing_columns = required_columns - set(routes.columns)
     if missing_columns:
@@ -102,16 +103,6 @@ def validate_and_prepare_routes(routes: pd.DataFrame, context: str) -> pd.DataFr
         raise ValueError(f"{context}: found an empty route")
 
     routes["free_flow_time"] = pd.to_numeric(routes["free_flow_time"], errors="coerce")
-    invalid_fft = ~np.isfinite(routes["free_flow_time"]) | (routes["free_flow_time"] <= 0.0)
-    if invalid_fft.any():
-        examples = routes.loc[
-            invalid_fft,
-            ["origins", "destinations", "path", "free_flow_time"],
-        ].head(5)
-        raise ValueError(
-            f"{context}: found {int(invalid_fft.sum())} routes with non-positive or "
-            f"non-finite free-flow time:\n{examples.to_string(index=False)}"
-        )
 
     routes = routes.drop_duplicates(
         subset=["origins", "destinations", "path"],
@@ -128,6 +119,22 @@ def validate_and_prepare_routes(routes: pd.DataFrame, context: str) -> pd.DataFr
         raise ValueError(f"{context}: generated duplicate route IDs")
 
     return routes
+
+def validate_free_flow_times(routes: pd.DataFrame, context: str) -> None:
+    if "free_flow_time" not in routes.columns:
+        raise ValueError(f"{context}: missing free_flow_time column")
+
+    free_flow_times = pd.to_numeric(routes["free_flow_time"], errors="coerce")
+    invalid_fft = ~np.isfinite(free_flow_times) | (free_flow_times <= 0.0)
+    if invalid_fft.any():
+        examples = routes.loc[
+            invalid_fft,
+            ["origins", "destinations", "path", "free_flow_time"],
+        ].head(5)
+        raise ValueError(
+            f"{context}: found {int(invalid_fft.sum())} routes with non-positive "
+            f"or non-finite free-flow time:\n{examples.to_string(index=False)}"
+        )
 
 
 def load_od_file(network_dir: Path, name: str) -> dict:
@@ -504,7 +511,7 @@ def generate_csv_routes(
                 calc_free_flow=True,
                 **path_gen_kwargs,
             )
-            routes = validate_and_prepare_routes(
+            routes = prepare_routes(
                 routes,
                 f"{name} OD ({o_id}, {d_id}) generation",
             )
@@ -557,7 +564,7 @@ def generate_csv_routes(
 
     # Save the routes to a CSV file    
     if all_routes:
-        all_routes_merged = validate_and_prepare_routes(
+        all_routes_merged = prepare_routes(
             pd.concat(all_routes, ignore_index=True),
             f"{name} combined route set",
         )
@@ -666,7 +673,7 @@ def enrich_routes(name: str, run_dir: Path) -> tuple[Path, Path]:
             f"{name}: missing route-enrichment inputs: {missing_files}"
         )
 
-    routes = validate_and_prepare_routes(
+    routes = prepare_routes(
         pd.read_csv(routes_file),
         f"{name} route enrichment input",
     )
@@ -839,11 +846,34 @@ def enrich_routes(name: str, run_dir: Path) -> tuple[Path, Path]:
         axis=1
     )
 
+    invalid_fft = (
+        ~np.isfinite(enriched["free_flow_time"])
+        | (enriched["free_flow_time"] <= 0.0)
+    )
+    repairable_fft = (
+        invalid_fft
+        & (enriched["total_length"] > 0.0)
+        & (enriched["mean_speed"] > 0.0)
+    )
+    if repairable_fft.any():
+        enriched.loc[repairable_fft, "free_flow_time"] = (
+            enriched.loc[repairable_fft, "total_length"]
+            / (enriched.loc[repairable_fft, "mean_speed"] / 3.6)
+            / 60.0
+        )
+        print(f"Repaired {int(repairable_fft.sum())} route free-flow times from length/speed.")
+
+    validate_free_flow_times(
+        enriched,
+        f"{name} enriched routes",
+    )
+
     enriched = add_spatial_features(enriched)
     
-    # Fill NaNs with defaults
+    # Degenerate one-edge routes can have zero straight-line distance.
+    # Treat them as perfectly direct rather than dropping the route.
     fill_values = {
-        'mean_circuity': 1.0, # ? why is that NaN sometimes
+        'mean_circuity': 1.0,
     }
     enriched = enriched.fillna(fill_values)
 
