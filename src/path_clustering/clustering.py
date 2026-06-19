@@ -31,6 +31,7 @@ def discover_paths(run_dir: Path) -> dict[str, Path | str]:
         "representants": run_dir / f"{dataset_name}_clusters_representants.csv",
         "masks": run_dir / f"{dataset_name}_action_masks.csv",
         "config": run_dir / f"{dataset_name}_clustering_config.json",
+        "route_set_config": run_dir / f"{dataset_name}_route_set_config.json",
         "diagnostics": run_dir / f"{dataset_name}_clustering_diagnostics.json",
     }
     if not paths["enriched"].is_file():
@@ -384,11 +385,35 @@ def make_json_safe(value):
     return value
 
 
+def summarize_feature_pruning(feature_selection: dict) -> list[dict]:
+    summary = []
+    for feature in feature_selection.get("zero_variance_removed", []):
+        summary.append({
+            "feature": feature,
+            "reason": "zero_variance",
+        })
+    for removal in feature_selection.get("correlation_removals", []):
+        summary.append({
+            "feature": removal["removed"],
+            "reason": "correlation",
+            "kept": removal["kept"],
+            "correlation": removal["correlation"],
+        })
+    for removal in feature_selection.get("vif_removals", []):
+        summary.append({
+            "feature": removal["removed"],
+            "reason": "vif",
+            "vif": removal["vif"],
+        })
+    return summary
+
+
 def run_clustering(
     run_dir: Path,
     algorithm: str,
     n_clusters: int,
     diagnostics: bool = False,
+    route_set_config: dict | None = None,
 ) -> tuple[Path, Path, Path, Path | None]:
     paths = discover_paths(run_dir)
     ranked, enriched = load_inputs(paths)
@@ -415,13 +440,22 @@ def run_clustering(
         "city_name": paths["dataset_name"],
         "algorithm": algorithm,
         "n_clusters": n_clusters,
-        "actual_n_clusters": len(metrics["cluster_sizes"]),
         "features_used": features,
+        "feature_pruning": summarize_feature_pruning(feature_selection),
         **metrics,
         "inertia": float(model.inertia_) if hasattr(model, "inertia_") else None,
     }
     with open(paths["config"], "w") as file:
         json.dump(make_json_safe(config), file, indent=2, allow_nan=False)
+
+    if route_set_config is not None:
+        with open(paths["route_set_config"], "w") as file:
+            json.dump(
+                make_json_safe(route_set_config),
+                file,
+                indent=2,
+                allow_nan=False,
+            )
 
     if diagnostics:
         diagnostic_data = build_diagnostics(

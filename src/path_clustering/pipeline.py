@@ -115,6 +115,10 @@ def generate_clustered_routes(
         algorithm=algorithm,
         n_clusters=n_clusters,
         diagnostics=diagnostics,
+        route_set_config={
+            "config_source": config_source,
+            **pipeline_config,
+        },
     )
 
     return ClusteredRouteOutputs(
