@@ -7,7 +7,7 @@ name = "path-clustering"
 version = "0.1.0"
 description = "Route generation, feature enrichment, and clustering for URB"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "janux==1.1.0",
     "lxml>=6.0",
