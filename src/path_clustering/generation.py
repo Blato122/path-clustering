@@ -552,9 +552,6 @@ def generate_csv_routes(
             f"max={max(route_counts)}"
         )
 
-    with open(run_dir / f"{name}_generation_summary.json", "w") as f:
-        json.dump(generation_rows, f, indent=2)
-
     if failed_ods:
         examples = failed_ods[:5]
         raise RuntimeError(
