@@ -6,7 +6,7 @@ import math
 import numpy as np
 import pandas as pd
 from sklearn.cluster import AgglomerativeClustering, Birch, KMeans
-from sklearn.metrics import calinski_harabasz_score, silhouette_score
+from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
@@ -180,10 +180,8 @@ def calculate_metrics(
     unique_labels = np.unique(labels)
     if len(unique_labels) < 2 or len(unique_labels) >= len(values):
         silhouette = None
-        ch_score = None
     else:
         silhouette = float(silhouette_score(values, labels))
-        ch_score = float(calinski_harabasz_score(values, labels))
 
     clustered = ranked[["origins", "destinations"]].copy()
     clustered["cluster"] = labels
@@ -196,7 +194,6 @@ def calculate_metrics(
     }
     return {
         "silhouette": silhouette,
-        "calinski_harabasz": ch_score,
         "average_actions_per_od": avg_actions,
         "cluster_sizes": cluster_sizes,
     }
@@ -479,14 +476,11 @@ def run_clustering(
         for cluster, count in metrics["cluster_sizes"].items()
     )
     silhouette = metrics["silhouette"]
-    ch_score = metrics["calinski_harabasz"]
     silhouette_text = f"{silhouette:.4f}" if silhouette is not None else "N/A"
-    ch_text = f"{ch_score:.1f}" if ch_score is not None else "N/A"
     print(
         f"Clustered {len(ranked)} routes into {len(metrics['cluster_sizes'])} clusters.\n"
         f"Cluster sizes: {sizes}\n"
         f"Silhouette: {silhouette_text}\n"
-        f"Calinski-Harabasz: {ch_text}\n"
         f"Average valid actions per OD: {metrics['average_actions_per_od']:.2f}"
     )
     return (
