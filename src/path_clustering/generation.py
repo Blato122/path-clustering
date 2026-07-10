@@ -468,7 +468,7 @@ def generate_csv_routes(
     required_files = [
         net_dir / name / f"{name}.con.xml",
         net_dir / name / f"{name}.edg.xml",
-        net_dir / name / f"{name}.rou.xml",
+        net_dir / name / f"{name}.net.xml",
         net_dir / name / "agents.csv"
     ]
     
@@ -478,7 +478,7 @@ def generate_csv_routes(
             f"{name}: missing required files for route generation: {missing_files}"
         )
 
-    con_file, edg_file, rou_file, agents_file = required_files
+    con_file, edg_file, net_file, agents_file = required_files
 
     ods = load_od_file(net_dir / name, name)
     agents = pd.read_csv(agents_file)
@@ -494,7 +494,7 @@ def generate_csv_routes(
     failed_ods = []
     generation_rows = []
     start_time = time.time()
-    network = jx.build_digraph(str(con_file), str(edg_file), str(rou_file), use_clustered_routes=True)
+    network = jx.build_digraph(str(con_file), str(edg_file), str(net_file), use_clustered_routes=True)
 
     # sample routes for each OD pair, not for each agent because multiple agents might have the same OD pair
     unique_od_pairs = agents[["origin", "destination"]].drop_duplicates()
