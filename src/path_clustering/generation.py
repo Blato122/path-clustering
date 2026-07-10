@@ -10,6 +10,7 @@ import math
 import argparse
 import numpy as np
 import json
+import networkx as nx
 
 CLUSTER_FEATURES = [
     # Cost / efficiency
@@ -119,6 +120,15 @@ def prepare_routes(routes: pd.DataFrame, context: str) -> pd.DataFrame:
         raise ValueError(f"{context}: generated duplicate route IDs")
 
     return routes
+
+def shortest_path_route(network, origin: str, destination: str) -> pd.DataFrame:
+    path = nx.shortest_path(network, source=origin, target=destination, weight="travel_time")
+    return pd.DataFrame([{
+        "origins": origin,
+        "destinations": destination,
+        "path": jx.iterable_to_string(path, ","),
+        "free_flow_time": jx.calculate_free_flow_time(path, network),
+    }])
 
 def validate_free_flow_times(routes: pd.DataFrame, context: str) -> None:
     if "free_flow_time" not in routes.columns:
@@ -517,21 +527,20 @@ def generate_csv_routes(
             )
 
             if routes.empty:
-                failed_ods.append((int(o_id), int(d_id), "no routes generated"))
-                generation_rows.append({
-                    "origin": int(o_id),
-                    "destination": int(d_id),
-                    "routes": 0,
-                    "status": "failed: no routes generated",
-                })
-                continue
+                routes = prepare_routes(
+                    shortest_path_route(network, origins[o_id], destinations[d_id]),
+                    f"{name} OD ({o_id}, {d_id}) shortest-path fallback",
+                )
+                status = "ok: shortest-path fallback"
+            else:
+                status = "ok"
 
             all_routes.append(routes)
             generation_rows.append({
                 "origin": int(o_id),
                 "destination": int(d_id),
                 "routes": len(routes),
-                "status": "ok",
+                "status": status,
             })
         except AssertionError as e:
             failed_ods.append((int(o_id), int(d_id), str(e)))
