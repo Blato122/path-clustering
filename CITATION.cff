@@ -4,7 +4,7 @@ authors:
   - family-names: "Torbus"
     given-names: "Błażej"
 title: "path-clustering"
-version: 1.0.0
+version: 1.1.0
 date-released: 2026-06-26
 repository-code: "https://github.com/Blato122/path-clustering"
 license: MIT
